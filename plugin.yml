@@ -1,0 +1,6 @@
+name: Warzone
+main: couk.Adamki11s.Warzone.Warzone
+version: 1.0
+commands:
+  warzone:
+    description: Warzone.
