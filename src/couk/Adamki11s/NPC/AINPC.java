@@ -15,7 +15,6 @@ public enum AINPC {
 	EvilSeph,
 	Dinnerbone,
 	Israphel,
-	SeaNanners,
 	RightLegRed,
 	
 	Afforess,

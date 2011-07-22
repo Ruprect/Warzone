@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class NPCManager {
 
-    private HashMap<String, NPCEntity> npcs = new HashMap<String, NPCEntity>();
+    public HashMap<String, NPCEntity> npcs = new HashMap<String, NPCEntity>();
     private BServer server;
 
     public NPCManager(JavaPlugin plugin) {

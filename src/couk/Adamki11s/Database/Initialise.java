@@ -17,7 +17,9 @@ public class Initialise {
 
 	private File mainDir = new File("plugins/Warzone"),
 	databaseRoot = new File(mainDir + File.separator + "Database"),
-	quitterRoot = new File(mainDir + File.separator + "Quitters");
+	quitterRoot = new File(mainDir + File.separator + "Quitters"),
+	configRoot = new File(mainDir + File.separator + "Configuration"),
+	inventoryRoot = new File(mainDir + File.separator + "Inventory");
 
 	public void init(){
 		directoryCheck();
@@ -28,14 +30,22 @@ public class Initialise {
 		if(!mainDir.exists()){
 			System.out.println(Warzone.prefix + " Creating Main Directory...");
 			mainDir.mkdir();
-			if(!databaseRoot.exists()){
-				System.out.println(Warzone.prefix + " Creating Database Directory...");
-				databaseRoot.mkdir();
-			}
-			if(!quitterRoot.exists()){
-				System.out.println(Warzone.prefix + " Creating Quitters Directory...");
-				quitterRoot.mkdir();
-			}
+		}
+		if(!databaseRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Database Directory...");
+			databaseRoot.mkdir();
+		}
+		if(!quitterRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Quitters Directory...");
+			quitterRoot.mkdir();
+		}
+		if(!configRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Configuration Directory...");
+			configRoot.mkdir();
+		}
+		if(!inventoryRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Inventory Directory...");
+			inventoryRoot.mkdir();
 		}
 	}
 	
@@ -47,7 +57,7 @@ public class Initialise {
 		core.initialize();
 		if(!core.checkTable("statistics")){
 			String createRanked = "CREATE TABLE statistics('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'player' VARCHAR(100), 'wins' INTEGER, 'draws' INTEGER" +
-					", 'losses' INTEGER, 'shotsfired' INTEGER, 'shotshit' INTEGER, 'shotsmissed' INTEGER, 'playtime' INT);";
+					", 'losses' INTEGER, 'shotsfired' INTEGER, 'shotshit' INTEGER, 'shotsmissed' INTEGER, 'playtime' INTEGER, 'kills' INTEGER, 'deaths' INTEGER, 'gp' INTEGER);";
 			/**
 			 * TODO: Add
 			 * Kill Death
@@ -63,10 +73,6 @@ public class Initialise {
 	
 	public static void pushStatistics(Player p){
 		try{
-			Bukkit.getServer().getScheduler().cancelTask(QueryPooler.sqlClose);
-			if(!Initialise.core.checkConnection()){
-				Initialise.core.initialize();
-			}
 			ResultSet res = core.sqlQuery("SELECT * FROM statistics WHERE player='" + p.getName() + "';");
 			while(res.next()){
 				String playername = res.getString("player");
@@ -76,7 +82,10 @@ public class Initialise {
 				shotsfired = res.getInt("shotsfired"),
 				shotshit = res.getInt("shotshit"),
 				shotsmissed = res.getInt("shotsmissed"),
-				timeplayed = res.getInt("playtime");
+				timeplayed = res.getInt("playtime"),
+				kills = res.getInt("kills"),
+				deaths = res.getInt("deaths"),
+				gamesplayed = res.getInt(("gp"));
 				Statistics.databaseHoldings.add(playername);
 				Statistics.totalGamesDrawn.put(playername, draws);
 				Statistics.totalGamesLost.put(playername, losses);
@@ -85,8 +94,10 @@ public class Initialise {
 				Statistics.totalShotsHit.put(playername, shotshit);
 				Statistics.totalShotsMissed.put(playername, shotsmissed);
 				Statistics.totalTimePlayed.put(playername, timeplayed);
+				Statistics.totalKills.put(playername, kills);
+				Statistics.totalDeaths.put(playername, deaths);
+				Statistics.gamesPlayed.put(playername, gamesplayed);
 			}
-			QueryPooler.sqlCloser();
 		} catch (SQLException ex){
 			ex.printStackTrace();
 		}
@@ -94,10 +105,6 @@ public class Initialise {
 	
 	private void pushStatistics(){
 		try{
-			Bukkit.getServer().getScheduler().cancelTask(QueryPooler.sqlClose);
-			if(!Initialise.core.checkConnection()){
-				Initialise.core.initialize();
-			}
 			ResultSet res = core.sqlQuery("SELECT * FROM statistics;");
 			while(res.next()){
 				String playername = res.getString("player");
@@ -107,7 +114,10 @@ public class Initialise {
 				shotsfired = res.getInt("shotsfired"),
 				shotshit = res.getInt("shotshit"),
 				shotsmissed = res.getInt("shotsmissed"),
-				timeplayed = res.getInt("playtime");
+				timeplayed = res.getInt("playtime"),
+				kills = res.getInt("kills"),
+				deaths = res.getInt("deaths"),
+				gamesplayed = res.getInt(("gp"));
 				Statistics.databaseHoldings.add(playername);
 				Statistics.totalGamesDrawn.put(playername, draws);
 				Statistics.totalGamesLost.put(playername, losses);
@@ -116,8 +126,10 @@ public class Initialise {
 				Statistics.totalShotsHit.put(playername, shotshit);
 				Statistics.totalShotsMissed.put(playername, shotsmissed);
 				Statistics.totalTimePlayed.put(playername, timeplayed);
+				Statistics.totalKills.put(playername, kills);
+				Statistics.totalDeaths.put(playername, deaths);
+				Statistics.gamesPlayed.put(playername, gamesplayed);
 			}
-			QueryPooler.sqlCloser();
 		} catch (SQLException ex){
 			ex.printStackTrace();
 		}

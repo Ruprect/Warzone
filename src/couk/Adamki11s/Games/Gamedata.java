@@ -7,8 +7,6 @@ import couk.Adamki11s.Warzone.Warzone.GameType;
 
 public abstract class Gamedata {
 	
-	public int gameTime = 120;
-	
 	public abstract void initiateScheduler();
 	
 	public abstract void initiateGame(ArrayList<Player> list);
@@ -21,7 +19,7 @@ public abstract class Gamedata {
 	
 	public abstract void shotMissed(Player p);
 	
-	public abstract void shotHit(Player p);
+	public abstract void shotHit(Player p, Player target);
 	
 	public abstract void incrementPlayerScore(Player p);
 	

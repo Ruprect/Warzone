@@ -1,8 +1,8 @@
 package couk.Adamki11s.Warzone;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -11,11 +11,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.martin.bukkit.npclib.NPCManager;
-
 import couk.Adamki11s.Commands.WarzoneCommands;
 import couk.Adamki11s.Database.Initialise;
-import couk.Adamki11s.Database.QueryPooler;
+import couk.Adamki11s.Database.InventoryData;
+import couk.Adamki11s.Database.MapDataLoader;
+import couk.Adamki11s.Database.PoolDataLoader;
 import couk.Adamki11s.Database.QuitterHandler;
+import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Games.ASCENSION_GD;
 import couk.Adamki11s.Games.BLIZZARD_GD;
 import couk.Adamki11s.Games.CASTLE_GD;
@@ -37,12 +39,16 @@ import couk.Adamki11s.Maps.PLAINES;
 import couk.Adamki11s.Maps.TOMB;
 import couk.Adamki11s.NPC.NPC_Control;
 import couk.Adamki11s.NPC.NPC_Handler;
+import couk.Adamki11s.NPC.NPC_Messages;
 
 public class Warzone extends JavaPlugin {
 	
-	public static QueryPooler queryPooler = new QueryPooler();
 	public static QuitterHandler quitterHandle = new QuitterHandler();
 	public static NPC_Handler npc_handle;
+	public static InventoryData inventData = new InventoryData();
+	public static MapDataLoader mdl = new MapDataLoader();
+	public static PoolDataLoader pdl = new PoolDataLoader();
+	public static NPC_Messages npcMessages = new NPC_Messages();
 	
 	public static Server server;
 	public static Plugin plugin;
@@ -56,6 +62,8 @@ public class Warzone extends JavaPlugin {
 	
 	public static NPCManager npcManage;
 	public static NPC_Control npc;
+	
+	public static ExtrasColour ec = new ExtrasColour();
 
 	@Override
 	public void onDisable() {
@@ -73,7 +81,6 @@ public class Warzone extends JavaPlugin {
 		jp = this;
 		npcManage = new NPCManager(this);
 		server = getServer();
-		queryPooler.poolQuerys();
 		PluginManager pm = server.getPluginManager();
 		pm.registerEvent(Type.CREATURE_SPAWN, new WarzoneCreatureSpawnEvent(), Event.Priority.Highest, this);
 		pm.registerEvent(Type.ENTITY_DAMAGE, new WarzoneEntityListener(), Priority.Normal, this);
@@ -85,17 +92,31 @@ public class Warzone extends JavaPlugin {
 		pm.registerEvent(Type.PLAYER_PORTAL, new WarzonePlayerListener(), Priority.Highest, this);
 		pm.registerEvent(Type.BLOCK_BREAK, new WarzoneBlockListener(), Priority.Highest, this);
 		pm.registerEvent(Type.BLOCK_PLACE, new WarzoneBlockListener(), Priority.Highest, this);
+		pm.registerEvent(Type.BLOCK_FORM, new WarzoneBlockListener(), Priority.Highest, this);
+		pm.registerEvent(Type.LEAVES_DECAY, new WarzoneBlockListener(), Priority.Highest, this);
+		pm.registerEvent(Type.PLAYER_INTERACT_ENTITY, new WarzonePlayerListener(), Priority.Highest, this);
 		new Initialise().init();
 		mapsClass.initi();
 		loadMaps();
 		loadData();
+		mdl.loadMapData();
+		pdl.loadPoolingData();
 		getCommand("warzone").setExecutor(new WarzoneCommands());
 		if(Maps.worldFound){
 			log.info(prefix + " Warzone, version " + version + " enabled successfully!");
 		}
+		
 		npc = new NPC_Control(this, npcManage);
 		npc_handle = new NPC_Handler(npcManage, npc);
-		npc_handle.enableNPCAIController();
+		
+
+		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Warzone.plugin, new Runnable() {
+
+            public void run() {
+        		npc_handle.enableNPCAIController();
+            }
+        }, 100L);
+		
 	}
 	
 	public void loadMaps() {

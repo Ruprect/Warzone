@@ -1,6 +1,5 @@
 package couk.Adamki11s.NPC;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -54,8 +53,11 @@ public class NPC_Control {
 	public void spawn(String reference, Location loc){
 		if(!npcs.containsKey(reference)){
 			npcs.put(reference, NpcManager.spawnNPC(reference, loc));
+		} else {
+			NpcManager.spawnNPC(reference, loc);
 		}
 	}
+	
 	public void despawn(String reference){
 		if (!check(reference)) return;
 		NpcManager.despawn(reference);

@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class DatabaseHandler {
 	/*
@@ -103,21 +104,33 @@ public class DatabaseHandler {
 		}
 	}
 	
-	public void updateQuery(String query) {
+	public boolean updateQuery(String query) {
 		try {
-			Connection connection = getConnection();
-		    Statement statement = connection.createStatement();
-		    
-		    statement.executeQuery(query);
-		    
+			boolean statementProcessed = false;
+			
+			while(!statementProcessed){
+				Connection connection = getConnection();
+				if(!connection.isClosed() && !connection.isReadOnly()){
+				    Statement statement = connection.createStatement();	
+				    try{
+				    	statement.executeUpdate(query);
+				    	statementProcessed = true;
+				    	return true;
+				    } catch (Exception ex){
+				    	ex.printStackTrace();
+				    }
+				}
+			}
+		  return false;
 		    
 		} catch (SQLException ex) {
-			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
+			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") || ex.getMessage().toLowerCase().contains("transaction")) {
 				retry(query);
 			}else{
 				if (!ex.toString().contains("not return ResultSet")) core.writeError("Error at SQL UPDATE Query: " + ex, false);
 			}
 		}
+		return false;
 	}
 	
 	public void deleteQuery(String query) {

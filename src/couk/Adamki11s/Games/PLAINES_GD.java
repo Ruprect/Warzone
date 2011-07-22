@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import couk.Adamki11s.Database.Initialise;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Lobby.Pool;
@@ -16,6 +18,8 @@ import couk.Adamki11s.Warzone.Warzone.GameType;
 import couk.Adamki11s.Warzone.Warzone.MapName;
 
 public class PLAINES_GD extends Gamedata {
+	
+	public static int gameTime;
 
 	HashMap<Player, Integer> score = new HashMap<Player, Integer>();
 	HashMap<Player, Integer> shotsHit = new HashMap<Player, Integer>();
@@ -26,6 +30,11 @@ public class PLAINES_GD extends Gamedata {
 	
 	HashMap<Player, ItemStack[]> invent = new HashMap<Player, ItemStack[]>();
 	HashMap<Player, ItemStack[]> inventArmour = new HashMap<Player, ItemStack[]>();
+	
+	HashMap<Player, Integer> kills = new HashMap<Player, Integer>();
+	HashMap<Player, Integer> deaths = new HashMap<Player, Integer>();
+	
+	private HashMap<Player, Integer> virtualHealth = new HashMap<Player, Integer>();
 	
 	ExtrasInventory inventmanage = new ExtrasInventory();
 	
@@ -53,26 +62,29 @@ public class PLAINES_GD extends Gamedata {
 		timer = 0;
 		playerQuit = false;
 		for(Player p : list){
+			kills.put(p, 0);
+			deaths.put(p, 0);
 			score.put(p, 0);
 			shotsHit.put(p, 0);
 			shotsFired.put(p, 0);
 			shotsMissed.put(p, 0);
+			virtualHealth.put(p, 3);
 		}
 		s1.setLine(0, ChatColor.DARK_GREEN + "YOU : 0");
 		s1.setLine(1, ChatColor.RED + "THEM : 0");
 		s1.setLine(2, ChatColor.DARK_PURPLE + "Time Left");
-		s1.setLine(3, ChatColor.DARK_PURPLE + "" + (super.gameTime - timer));
+		s1.setLine(3, ChatColor.DARK_PURPLE + "" + (gameTime - timer));
 		s2.setLine(0, ChatColor.DARK_GREEN + "YOU : 0");
 		s2.setLine(1, ChatColor.RED + "THEM : 0");
 		s2.setLine(2, ChatColor.DARK_PURPLE + "Time Left");
-		s2.setLine(3, ChatColor.DARK_PURPLE + "" + (super.gameTime - timer));
+		s2.setLine(3, ChatColor.DARK_PURPLE + "" + (gameTime - timer));
 		s1.update();
 		s2.update();
 	}
 	
 	@Override
 	public void addParticipant(Player p) {
-		Warzone.queryPooler.updateGlobalStatistics(p);
+		Initialise.pushStatistics(p);
 		participants.add(p);
 		previousLocation.put(p, Pool.locs.get(p));
 		invent.put(p, p.getInventory().getContents());
@@ -95,10 +107,21 @@ public class PLAINES_GD extends Gamedata {
 	}
 
 	@Override
-	public void shotHit(Player p) {
+	public void shotHit(Player p, Player target) {
 		shotsHit.put(p, shotsHit.get(p) + 1);
-		incrementPlayerScore(p);
-		respawn();
+		virtualHealth.put(target, virtualHealth.get(target) - 1);
+		
+		if(virtualHealth.get(target) <= 0){
+			target.damage(1);
+			kills.put(p, kills.get(p) + 1);
+			deaths.put(target, deaths.get(target) + 1);
+			Warzone.ec.sendColouredMessage(p, "&red[Warzone] &aYou shot &9" + target.getName() + "&a and gained a point!");
+			Warzone.ec.sendColouredMessage(target, "&red[Warzone] &aYou got shot by &9" + p.getName() + "!");
+			virtualHealth.put(target, 3);
+			virtualHealth.put(p, 3);
+			incrementPlayerScore(p);
+			respawn();
+		}
 	}
 
 	@Override
@@ -141,7 +164,7 @@ public class PLAINES_GD extends Gamedata {
 	public void tickerTask(int schedulerTask) {
 		Player quitter = null;
 		if(Warzone.server.getPlayer(participants.get(0).getName()) == null){
-			timer = super.gameTime;
+			timer = gameTime;
 			playerQuit = true;
 			score.put(participants.get(0), 0);
 			score.put(participants.get(1), score.get(participants.get(1)) + 1);
@@ -152,7 +175,7 @@ public class PLAINES_GD extends Gamedata {
 			}
 			endGame(schedulerTask);
 		} else if(Warzone.server.getPlayer(participants.get(1).getName()) == null){
-			timer = super.gameTime;
+			timer = gameTime;
 			playerQuit = true;
 			score.put(participants.get(1), 0);
 			score.put(participants.get(0), score.get(participants.get(0)) + 1);
@@ -164,33 +187,43 @@ public class PLAINES_GD extends Gamedata {
 			endGame(schedulerTask);
 		} else {
 			timer++;
-			if((((timer - 1) % 60) == 0) && (timer < super.gameTime - 50)){
-				for(Player p : participants){
-					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Timer]" + ChatColor.GREEN + " " + ((Math.round(super.gameTime - timer) / 60) + 1) + " minute(s) remaining.");
+			if((timer % 10) == 0){
+				for(Player pp : participants){
+					if(virtualHealth.get(pp) < 3){
+						virtualHealth.put(pp, virtualHealth.get(pp) + 1);
+					}
 				}
-			} else if(((super.gameTime - timer) < 10) && ((timer >= (super.gameTime - 10)) && (timer <= super.gameTime) )){
+			}
+			if((((timer - 1) % 60) == 0) && (timer < gameTime - 50)){
 				for(Player p : participants){
-					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Timer]" + ChatColor.GREEN + " " + (super.gameTime - timer) + " second(s) remaining.");
+					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Timer]" + ChatColor.GREEN + " " + ((Math.round(gameTime - timer) / 60) + 1) + " minute(s) remaining.");
+				}
+			} else if(((gameTime - timer) < 10) && ((timer >= (gameTime - 10)) && (timer <= gameTime) )){
+				for(Player p : participants){
+					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Timer]" + ChatColor.GREEN + " " + (gameTime - timer) + " second(s) remaining.");
 				}		
 			}
 		}
-		if(timer > super.gameTime){
+		if(timer > gameTime){
 			endGame(schedulerTask);
 		}
+
+		s1.setLine(2, ChatColor.DARK_PURPLE + "Time Left");
 		s2.setLine(2, ChatColor.DARK_PURPLE + "Time Left");
-		s2.setLine(2, ChatColor.DARK_PURPLE + "Time Left");
-		s1.setLine(3, ChatColor.DARK_PURPLE + "" + (super.gameTime - timer));
-		s2.setLine(3, ChatColor.DARK_PURPLE + "" + (super.gameTime - timer));
+		s1.setLine(3, ChatColor.DARK_PURPLE + "" + (gameTime - timer));
+		s2.setLine(3, ChatColor.DARK_PURPLE + "" + (gameTime - timer));
 		s1.update();
 		s2.update();
 		
 		if(playerQuit && quitter != null){
-			int playTime = Statistics.totalTimePlayed.get(quitter.getName()) + super.gameTime;
+			Warzone.inventData.checkFile(quitter);
+			Warzone.inventData.saveInventory(quitter, invent.get(quitter));
+			int playTime = Statistics.totalTimePlayed.get(quitter.getName()) + gameTime;
 			int loss = Statistics.totalGamesLost.get(quitter.getName()) + 1;
 			if(gametype == GameType.RANKED){
 				String updateStats = "UPDATE statistics SET playtime='" + playTime + "'" +
 				", losses='" + loss + "' WHERE player='" + quitter.getName() + "';";
-				Warzone.queryPooler.addQueryToPool(updateStats);
+				Initialise.core.updateQuery(updateStats);
 			}
 			
 			if(!Warzone.quitterHandle.doesExist(quitter)){
@@ -243,7 +276,7 @@ public class PLAINES_GD extends Gamedata {
 		shotsFired.clear();
 		shotsMissed.clear();
 		timer = 0;
-		Warzone.mapList.get(MapName.ASCENSION).setOccupiedState(false);
+		Warzone.mapList.get(MapName.PLAINES).setOccupiedState(false);
 		Warzone.server.getScheduler().cancelTask(taskid);
 	}
 	
@@ -254,36 +287,38 @@ public class PLAINES_GD extends Gamedata {
 			int fired = Statistics.totalShotsFired.get(p.getName()) + shotsFired.get(p);
 			int hit = Statistics.totalShotsHit.get(p.getName()) + shotsHit.get(p);
 			int missed = Statistics.totalShotsMissed.get(p.getName()) + (fired - hit);
-			int playTime = Statistics.totalTimePlayed.get(p.getName()) + super.gameTime;
+			int playTime = Statistics.totalTimePlayed.get(p.getName()) + gameTime;
 			int won = Statistics.totalGamesWon.get(p.getName()) + 1;
 			int loss = Statistics.totalGamesLost.get(p.getName()) + 1;
 			int drew = Statistics.totalGamesDrawn.get(p.getName()) + 1;
+			int gp = Statistics.gamesPlayed.get(p.getName()) + 1;
+			int kill = Statistics.totalKills.get(p.getName()) + kills.get(p);
+			int death = Statistics.totalDeaths.get(p.getName()) + deaths.get(p);
 			String updateStats = "";
 			if(!playerQuit){
 				if(wasDraw){
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
-							", draws='" + drew + "' WHERE player='" + p.getName() + "';";
+							", draws='" + drew + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				} else if(getWinner() == p){
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
-					", wins='" + won + "' WHERE player='" + p.getName() + "';";
+					", wins='" + won + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				} else {
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
-					", losses='" + loss + "' WHERE player='" + p.getName() + "';";
+					", losses='" + loss + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				}
-				Warzone.queryPooler.addQueryToPool(updateStats);
+				Initialise.core.updateQuery(updateStats);
 			} else {
 				if(Warzone.server.getPlayer(p.getName()) == null){
-		
+				
 				} else {
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
-					", wins='" + won + "' WHERE player='" + p.getName() + "';";
+					", wins='" + won + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				}
-				Warzone.queryPooler.addQueryToPool(updateStats);
+				Initialise.core.updateQuery(updateStats);
 			}
 			
-			
+			Initialise.pushStatistics(p);
 		}
-		wasDraw = false;
 	}
 
 	@Override
@@ -302,31 +337,15 @@ public class PLAINES_GD extends Gamedata {
 		inventmanage.wipeInventory(participants.get(0));
 		inventmanage.wipeInventory(participants.get(1));
 		
-		participants.get(0).getInventory().addItem(new ItemStack(261, 1));
-		inventmanage.addToInventory(participants.get(0), 262, 64);
-		inventmanage.addToInventory(participants.get(0), 262, 64);
+		inventmanage.addToInventory(participants.get(0), 261, 1);
+		inventmanage.addToInventory(participants.get(1), 261, 1);
+		
 		inventmanage.addToInventory(participants.get(0), 262, 64);
 		inventmanage.addToInventory(participants.get(0), 263, 5);
 		
-		participants.get(1).getInventory().addItem(new ItemStack(261, 1));
-		inventmanage.addToInventory(participants.get(1), 262, 64);
-		inventmanage.addToInventory(participants.get(1), 262, 64);
 		inventmanage.addToInventory(participants.get(1), 262, 64);
 		inventmanage.addToInventory(participants.get(1), 263, 5);
-		
-		Player first = participants.get(0), second = participants.get(1);
-		
-		for(Player p : participants){
-			if((score.get(p) % 3) == 0){
-				if(p == first){
-					p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Your kills : " + ChatColor.BLUE + score.get(p) + ChatColor.BLACK + " | " +
-							ChatColor.GREEN + "Opponents kills : " + ChatColor.BLUE + score.get(second)); 
-				} else if(p == second){
-					p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Your kills : " + ChatColor.BLUE + score.get(p) + ChatColor.BLACK + " | " +
-							ChatColor.GREEN + "Opponents kills : " + ChatColor.BLUE + score.get(first)); 
-				}
-			}
-		}
+
 		updateSigns();
 		
 	}

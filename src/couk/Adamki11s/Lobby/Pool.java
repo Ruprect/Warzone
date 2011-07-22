@@ -58,6 +58,9 @@ public class Pool {
 	
 	public static HashMap<Player, Boolean> chilledInLobby = new HashMap<Player, Boolean>();
 	
+	public static int timeout_Count = 120, sendSearchMessageEvery_XSeconds = 15;
+	public static boolean showTOC = false;
+	
 	Player chiller;
 	
 	public void findMatch(Player play, GameType ranked){
@@ -72,7 +75,11 @@ public class Pool {
 			searcherPlayer.put(searchers.size(), play);
 			gameType.put(play, ranked);
 			timeoutCount.put(play, 0);
-			col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
+			if(showTOC){
+				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
+			} else {
+				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
+			}
 		} else {
 			col.sendColouredMessage(play, "&red[Warzone] You are already searching! ");
 			col.sendColouredMessage(play, "&red[Warzone] Do &e/warzone stop-search &redto cancel");
@@ -92,20 +99,22 @@ public class Pool {
 							index++;
 							toc = timeoutCount.get(p) + 1;
 							timeoutCount.put(p, toc);
-							if(toc >= 120){
+							if(toc >= timeout_Count){
 								broken = true;
 								if(!toRemove.contains(p)){
 									toRemove.add(p);
-									col.sendColouredMessage(searcherPlayer.get(index), "&red[Warzone]&e " + type + " :&red No players found, request timed out.");
+									col.sendColouredMessage(p, "&red[Warzone]&e " + type + " :&red No players found, request timed out.");
 									p.teleport(locs.get(p));
-								}
-								if(searchers.size() == 1){
 									break;
 								}
 							}
-							if(((toc % 15) == 0) && !broken){
+							if(((toc % sendSearchMessageEvery_XSeconds) == 0) && !broken){
 								searcher = searcherPlayer.get(index);
-								col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : Searching for players..."));
+								if(showTOC){
+									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : Searching for players... &redTimeout in : &e" + (timeout_Count - timeoutCount.get(searcher))));
+								} else {
+									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : Searching for players..."));
+								}
 							}
 						}	
 						
@@ -131,7 +140,7 @@ public class Pool {
 							gameType.remove(p);
 							timeoutCount.remove(p);
 							locs.remove(p);
-						}
+					}
 					
 				}
 
@@ -244,15 +253,11 @@ public class Pool {
 				
 				first.getInventory().addItem(new ItemStack(261, 1));
 				inventmanage.addToInventory(first, 262, 64);
-				inventmanage.addToInventory(first, 262, 64);
-				inventmanage.addToInventory(first, 262, 64);
-				inventmanage.addToInventory(first, 263, 10);
+				inventmanage.addToInventory(first, 263, 5);
 				
 				second.getInventory().addItem(new ItemStack(261, 1));
 				inventmanage.addToInventory(second, 262, 64);
-				inventmanage.addToInventory(second, 262, 64);
-				inventmanage.addToInventory(second, 262, 64);
-				inventmanage.addToInventory(second, 263, 10);
+				inventmanage.addToInventory(second, 263, 5);
 				
 				gd.initiateScheduler();	
 				

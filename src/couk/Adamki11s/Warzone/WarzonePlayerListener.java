@@ -5,31 +5,42 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.martin.bukkit.npclib.NPCEntity;
+
 import couk.Adamki11s.Database.Initialise;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Extras.Player.ExtrasPlayer;
 import couk.Adamki11s.Games.Gamedata;
 import couk.Adamki11s.Maps.Maps;
+import couk.Adamki11s.NPC.AINPC;
+import couk.Adamki11s.NPC.NPC_Control;
 import couk.Adamki11s.Warzone.Warzone.MapData;
 
 public class WarzonePlayerListener extends PlayerListener {
 
 	public void onPlayerJoin(PlayerJoinEvent evt){
-		if(!Statistics.databaseHoldings.contains(evt.getPlayer().getName())){
-			Initialise.core.insertQuery("INSERT INTO statistics (player, wins, draws, losses, shotsfired, shotshit, shotsmissed)" +
-					" values ('" + evt.getPlayer().getName() + "', '0', '0', '0', '0', '0', '0');");
-			Statistics.databaseHoldings.add(evt.getPlayer().getName());
-			Initialise.pushStatistics(evt.getPlayer());
+		if(Warzone.inventData.isInNeedOfInventoryLoading(evt.getPlayer())){
+			evt.getPlayer().getInventory().setContents(Warzone.inventData.loadInventory(evt.getPlayer()));
+			Warzone.inventData.checkFile(evt.getPlayer());
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Inventory was restored successfully.");
 		}
+		if(!Statistics.databaseHoldings.contains(evt.getPlayer().getName())){
+			Initialise.core.insertQuery("INSERT INTO statistics (player, wins, draws, losses, shotsfired, shotshit, shotsmissed, kills, deaths, playtime, gp)" +
+					" values ('" + evt.getPlayer().getName() + "', '1', '1', '1', '1', '1', '1', '1', '1', '0', '0');");
+			Statistics.databaseHoldings.add(evt.getPlayer().getName());
+		}
+		Initialise.pushStatistics(evt.getPlayer());
 		if(Warzone.quitterHandle.doesExist(evt.getPlayer())){
 			evt.getPlayer().teleport(Warzone.quitterHandle.getQuitterLocation(evt.getPlayer()));
 			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] You quit during a game! Returned to initial location.");
@@ -102,6 +113,16 @@ public class WarzonePlayerListener extends PlayerListener {
 	public void onPlayerPortal(PlayerPortalEvent evt){
 		if(evt.getPlayer().getWorld() == Maps.Warzone_World){
 			evt.setCancelled(true);
+		}
+	}
+	
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent evt){
+		if(Warzone.npcManage.isNPC(evt.getRightClicked())){
+			CraftEntity e = (CraftEntity)evt.getRightClicked();
+			NPCEntity npce = (NPCEntity) e.getHandle();
+			AINPC ainpc = Warzone.npcMessages.getAINPCFromName(npce.name);
+			String randomMessage = Warzone.npcMessages.getRandomMessage(ainpc);
+		    evt.getPlayer().sendMessage(ChatColor.RED + "[" + ChatColor.YELLOW + npce.name + ChatColor.RED + "] " + ChatColor.WHITE + randomMessage);
 		}
 	}
 

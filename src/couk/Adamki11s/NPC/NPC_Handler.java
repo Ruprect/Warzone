@@ -137,12 +137,17 @@ public class NPC_Handler {
 		npcRef.add(AINPC.EvilSeph);
 		npcRef.add(AINPC.Dinnerbone);
 		npcRef.add(AINPC.Israphel);
-		npcRef.add(AINPC.SeaNanners);
 		npcRef.add(AINPC.RightLegRed);
 		npcRef.add(AINPC.Afforess);
 		npcRef.add(AINPC.Coestar);
 		npcRef.add(AINPC.Honeydew);
 	}
+	
+	private Location Adamki11sSpawn = new Location(Maps.Warzone_World, -100.5, 78, 210.7, (float)-181, (float)5.85),
+	                 iPhysXSpawn = new Location(Maps.Warzone_World, -95.3, 78, 210, (float)179.45, (float)4.5),
+	                 alta189Spawn = new Location(Maps.Warzone_World, -105.5, 78, 210, (float)179.45, (float)4.5),
+	                 ESpawn = new Location(Maps.Warzone_World, -90.46, 78, 211.65, (float) 142.10117, (float) 4.2),
+	                 CronikkkSpawn = new Location(Maps.Warzone_World, -110.9, 78, 211.6, (float) 223.7, (float) 4.35);
 	
 	private void spawnNPCS(){
 		for(AINPC ref : npcRef){
@@ -150,7 +155,12 @@ public class NPC_Handler {
 			Location l = getRandomSpawn();
 			spawnNPC(r, l);
 		}
-		npc.setItemInHand(AINPC.Adamki11s.toString(), Material.GLOWSTONE);
+		spawnNPC("Adamki11s", Adamki11sSpawn);
+	     spawnNPC("iPhysX", iPhysXSpawn);
+	     spawnNPC("alta189", alta189Spawn);
+	     spawnNPC("Notch", ESpawn);
+	     spawnNPC("cronikkk", CronikkkSpawn);
+		npc.setItemInHand(AINPC.Adamki11s.toString(), Material.DIAMOND_SWORD);
 		npc.setItemInHand(AINPC.Afforess.toString(), Material.BOOK);
 		npc.setItemInHand(AINPC.alta189.toString(), Material.BED);
 		npc.setItemInHand(AINPC.cronikkk.toString(), Material.EGG);
@@ -163,7 +173,6 @@ public class NPC_Handler {
 		npc.setItemInHand(AINPC.Israphel.toString(), Material.GREEN_RECORD);
 		npc.setItemInHand(AINPC.Xephos.toString(), Material.LAPIS_BLOCK);
 		npc.setItemInHand(AINPC.Notch.toString(), Material.GOLDEN_APPLE);
-		npc.setItemInHand(AINPC.SeaNanners.toString(), Material.SOUL_SAND);
 		npc.setItemInHand(AINPC.RightLegRed.toString(), Material.PUMPKIN);
 		
 	}
@@ -204,15 +213,14 @@ public class NPC_Handler {
 	}
 	
 	private void Q_5(){
-		AINPC xq1 = AINPC.Notch, xq2 = AINPC.SeaNanners, xq3 = AINPC.RightLegRed;
+		AINPC xq1 = AINPC.Notch, xq3 = AINPC.RightLegRed;
 		npc.move(xq1.toString(), getRandomSpawn());
-		npc.move(xq2.toString(), getRandomSpawn());
 		npc.move(xq3.toString(), getRandomSpawn());
 	}
 	
 	private void R_A(){
 		AINPC ra1, ra2;
-		int ri1 = exr.getRandomInt(15, 0), ri2 = exr.getRandomInt(15, 0);
+		int ri1 = exr.getRandomInt(14, 0), ri2 = exr.getRandomInt(14, 0);
 		ra1 = getAINPC(ri1);
 		ra2 = getAINPC(ri2);
 		npc.animateArmSwing(ra1.toString());
@@ -235,14 +243,11 @@ public class NPC_Handler {
 		case 10 : ra1 = AINPC.Israphel; break;
 		case 11 : ra1 = AINPC.Xephos; break;
 		case 12 : ra1 = AINPC.Notch; break;
-		case 13 : ra1 = AINPC.SeaNanners; break;
-		case 14 : ra1 = AINPC.RightLegRed; break;
+		case 13 : ra1 = AINPC.RightLegRed; break;
 		default: ra1 = AINPC.Adamki11s;
 		}
 		return ra1;
 	}
-	
-	
 	
 	private Location getRandomSpawn(){
 		World w = Maps.Warzone_World;//92 - 108, 212 - 232
@@ -256,7 +261,7 @@ public class NPC_Handler {
 		return new Location(w, x, y, z, _y, _p);	
 	}
 
-	private void spawnNPC(String name, Location loc){
+	public void spawnNPC(String name, Location loc){
 		npc.spawn(name, loc);
 	}
 

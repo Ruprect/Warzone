@@ -16,5 +16,8 @@ public class Statistics {
 	public static HashMap<String, Integer> totalGamesLost = new HashMap<String, Integer>();
 	public static HashMap<String, Integer> totalTimePlayed = new HashMap<String, Integer>();
 	public static HashMap<Player, Long> totalPoints = new HashMap<Player, Long>();
+	public static HashMap<String, Integer> totalKills = new HashMap<String, Integer>();
+	public static HashMap<String, Integer> totalDeaths = new HashMap<String, Integer>();
+	public static HashMap<String, Integer> gamesPlayed = new HashMap<String, Integer>();
 
 }

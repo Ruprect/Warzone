@@ -6,6 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityListener;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.martin.bukkit.npclib.NPCEntity;
+
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Extras.Regions.ExtrasRegions;
 import couk.Adamki11s.Games.Gamedata;
@@ -22,19 +25,22 @@ public class WarzoneEntityListener extends EntityListener {
 			evt.setCancelled(true);
 		}
 		if (evt instanceof EntityDamageByEntityEvent) {
+			
 			Entity e = evt.getEntity();
 			Entity damaged = ((EntityDamageByEntityEvent)evt).getDamager();
 			
 			if(e instanceof Player && damaged instanceof Player){
 				Player p = (Player)e;
-				for(Entry<MapData, Gamedata> maps : Warzone.mapData.entrySet()){
-					if(maps.getValue().getParticipants().contains(p) && maps.getValue().getParticipants().contains(damaged)){
-							Gamedata gd = maps.getValue();
-							EntityDamageByEntityEvent edbee = (EntityDamageByEntityEvent)evt;
-							Player damager = (Player) edbee.getDamager();
-							gd.shotHit(damager);
-							ec.sendColouredMessage(damager, "&red[Warzone] &aYou shot &9" + p.getName() + "&a and gained a point!");
-							ec.sendColouredMessage(p, "&red[Warzone] &aYou got shot by &9" + damager.getName() + "!");
+				Player other = (Player)damaged;
+				if(p.getName() != other.getName()){
+					for(Entry<MapData, Gamedata> maps : Warzone.mapData.entrySet()){
+						if(maps.getValue().getParticipants().contains(p) && maps.getValue().getParticipants().contains(damaged)){
+								Gamedata gd = maps.getValue();
+								EntityDamageByEntityEvent edbee = (EntityDamageByEntityEvent)evt;
+								Player damager = (Player) edbee.getDamager();
+								Player target = (Player) edbee.getEntity();
+								gd.shotHit(damager, target);
+						}
 					}
 				}
 			}
