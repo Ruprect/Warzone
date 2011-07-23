@@ -17,23 +17,46 @@ import couk.Adamki11s.Database.InventoryData;
 import couk.Adamki11s.Database.MapDataLoader;
 import couk.Adamki11s.Database.PoolDataLoader;
 import couk.Adamki11s.Database.QuitterHandler;
+import couk.Adamki11s.Database.Ranks;
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
+import couk.Adamki11s.Games.ABYSS_GD;
+import couk.Adamki11s.Games.AFTERMATH_GD;
 import couk.Adamki11s.Games.ASCENSION_GD;
+import couk.Adamki11s.Games.AURORA_GD;
+import couk.Adamki11s.Games.BLIND_GD;
 import couk.Adamki11s.Games.BLIZZARD_GD;
+import couk.Adamki11s.Games.BURROW_GD;
 import couk.Adamki11s.Games.CASTLE_GD;
+import couk.Adamki11s.Games.CONTAINMENT_GD;
+import couk.Adamki11s.Games.CRYPT_GD;
+import couk.Adamki11s.Games.DOME_GD;
 import couk.Adamki11s.Games.DUNGEON_GD;
 import couk.Adamki11s.Games.Gamedata;
+import couk.Adamki11s.Games.HOMETREE_GD;
 import couk.Adamki11s.Games.JUNGLE_GD;
+import couk.Adamki11s.Games.LAPUTA_GD;
+import couk.Adamki11s.Games.NUKETOWN_GD;
 import couk.Adamki11s.Games.OVERFLOW_GD;
 import couk.Adamki11s.Games.PLAINES_GD;
 import couk.Adamki11s.Games.TOMB_GD;
+import couk.Adamki11s.Maps.ABYSS;
+import couk.Adamki11s.Maps.AFTERMATH;
 import couk.Adamki11s.Maps.ASCENSION;
+import couk.Adamki11s.Maps.AURORA;
+import couk.Adamki11s.Maps.BLIND;
 import couk.Adamki11s.Maps.BLIZZARD;
+import couk.Adamki11s.Maps.BURROW;
 import couk.Adamki11s.Maps.CASTLE;
+import couk.Adamki11s.Maps.CONTAINMENT;
+import couk.Adamki11s.Maps.CRYPT;
+import couk.Adamki11s.Maps.DOME;
 import couk.Adamki11s.Maps.DUNGEON;
+import couk.Adamki11s.Maps.HOMETREE;
 import couk.Adamki11s.Maps.JUNGLE;
+import couk.Adamki11s.Maps.LAPUTA;
 import couk.Adamki11s.Maps.Map;
 import couk.Adamki11s.Maps.Maps;
+import couk.Adamki11s.Maps.NUKETOWN;
 import couk.Adamki11s.Maps.OVERFLOW;
 import couk.Adamki11s.Maps.PLAINES;
 import couk.Adamki11s.Maps.TOMB;
@@ -69,10 +92,13 @@ public class Warzone extends JavaPlugin {
 	public void onDisable() {
 		server.getScheduler().cancelTasks(plugin);
 		npc_handle.despawnNPCS();
+		Initialise.core.close();
 		log.info(prefix + " Warzone, version " + version + " disabled successfully!");  
 	}
 	
 	Maps mapsClass = new Maps();
+	
+	Ranks rnks = new Ranks();
 
 	@Override
 	public void onEnable() {
@@ -99,6 +125,7 @@ public class Warzone extends JavaPlugin {
 		mapsClass.initi();
 		loadMaps();
 		loadData();
+		rnks.initialiseRanks();
 		mdl.loadMapData();
 		pdl.loadPoolingData();
 		getCommand("warzone").setExecutor(new WarzoneCommands());
@@ -128,6 +155,17 @@ public class Warzone extends JavaPlugin {
 		mapList.put(MapName.TOMB, new TOMB());
 		mapList.put(MapName.BLIZZARD, new BLIZZARD());
 		mapList.put(MapName.JUNGLE, new JUNGLE());
+		mapList.put(MapName.BLIND, new BLIND());
+		mapList.put(MapName.CONTAINMENT, new CONTAINMENT());
+		mapList.put(MapName.AFTERMATH, new AFTERMATH());
+		mapList.put(MapName.CRYPT, new CRYPT());
+		mapList.put(MapName.HOMETREE, new HOMETREE());
+		mapList.put(MapName.AURORA, new AURORA());
+		mapList.put(MapName.ABYSS, new ABYSS());
+		mapList.put(MapName.BURROW, new BURROW());
+		mapList.put(MapName.LAPUTA, new LAPUTA());
+		mapList.put(MapName.DOME, new DOME());
+		mapList.put(MapName.NUKETOWN, new NUKETOWN());
 	}
 	
 	public void loadData(){
@@ -139,6 +177,17 @@ public class Warzone extends JavaPlugin {
 		mapData.put(MapData.TOMB, new TOMB_GD());
 		mapData.put(MapData.BLIZZARD, new BLIZZARD_GD());
 		mapData.put(MapData.JUNGLE, new JUNGLE_GD());
+		mapData.put(MapData.BLIND, new BLIND_GD());
+		mapData.put(MapData.CONTAINMENT, new CONTAINMENT_GD());
+		mapData.put(MapData.AFTERMATH, new AFTERMATH_GD());
+		mapData.put(MapData.CRYPT, new CRYPT_GD());
+		mapData.put(MapData.HOMETREE, new HOMETREE_GD());
+		mapData.put(MapData.AURORA, new AURORA_GD());
+		mapData.put(MapData.ABYSS, new ABYSS_GD());
+		mapData.put(MapData.BURROW, new BURROW_GD());
+		mapData.put(MapData.LAPUTA, new LAPUTA_GD());
+		mapData.put(MapData.DOME, new DOME_GD());
+		mapData.put(MapData.NUKETOWN, new NUKETOWN_GD());
 	}
 	
 	public static enum GameType{
@@ -161,7 +210,18 @@ public class Warzone extends JavaPlugin {
 		PLAINES,
 		TOMB,
 		JUNGLE,
-		BLIZZARD;
+		BLIZZARD,
+		BLIND,
+		CONTAINMENT,
+		AFTERMATH,
+		CRYPT,
+		HOMETREE,
+		AURORA,
+		ABYSS,
+		BURROW,
+		LAPUTA,
+		DOME,
+		NUKETOWN;
 		
 		@Override
 		public String toString() {
@@ -178,7 +238,18 @@ public class Warzone extends JavaPlugin {
 		PLAINES,
 		TOMB,
 		JUNGLE,
-		BLIZZARD;
+		BLIZZARD,
+		BLIND,
+		CONTAINMENT,
+		AFTERMATH,
+		CRYPT,
+		HOMETREE,
+		AURORA,
+		ABYSS,
+		BURROW,
+		LAPUTA,
+		DOME,
+		NUKETOWN;
 		
 		@Override
 		public String toString() {

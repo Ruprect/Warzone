@@ -59,7 +59,6 @@ public class InventoryData {
 	
 	public void checkFile(Player p){
 		File tmp = new File(inventoryRoot + File.separator + p.getName() + ".inv");
-		Configuration c = new Configuration(tmp);
 		if(tmp.exists()){
 			tmp.delete();
 		} else {

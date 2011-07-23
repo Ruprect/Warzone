@@ -3,4 +3,5 @@ main: couk.Adamki11s.Warzone.Warzone
 version: 1.0
 commands:
   warzone:
+    aliases: wz
     description: Warzone.

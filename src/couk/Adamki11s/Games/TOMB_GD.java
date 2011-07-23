@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import couk.Adamki11s.Database.Initialise;
+import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
+import couk.Adamki11s.Extras.Player.ExtrasPlayer;
 import couk.Adamki11s.Lobby.Pool;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone;
@@ -18,40 +21,40 @@ import couk.Adamki11s.Warzone.Warzone.GameType;
 import couk.Adamki11s.Warzone.Warzone.MapName;
 
 public class TOMB_GD extends Gamedata{
-	
+
 	public static int gameTime;
-	
+
 	HashMap<Player, Integer> score = new HashMap<Player, Integer>();
 	HashMap<Player, Integer> shotsHit = new HashMap<Player, Integer>();
 	HashMap<Player, Integer> shotsFired = new HashMap<Player, Integer>();
 	HashMap<Player, Integer> shotsMissed = new HashMap<Player, Integer>();
-	
+
 	HashMap<Player, Location> previousLocation = new HashMap<Player, Location>();
-	
+
 	HashMap<Player, ItemStack[]> invent = new HashMap<Player, ItemStack[]>();
 	HashMap<Player, ItemStack[]> inventArmour = new HashMap<Player, ItemStack[]>();
-	
+
 	HashMap<Player, Integer> kills = new HashMap<Player, Integer>();
 	HashMap<Player, Integer> deaths = new HashMap<Player, Integer>();
-	
+
 	private HashMap<Player, Integer> virtualHealth = new HashMap<Player, Integer>();
-	
+
 	private Location sign1 = new Location(Maps.Warzone_World, -209.5, 73.62, -29.5),
 	sign2 = new Location(Maps.Warzone_World, -232.5, 73.62, -25.5);
-	
+
 	Sign s1 = (Sign)Maps.Warzone_World.getBlockAt(sign1).getState();
 	Sign s2 = (Sign)Maps.Warzone_World.getBlockAt(sign2).getState();
-	
+
 	ExtrasInventory inventmanage = new ExtrasInventory();
-	
+
 	private int timer = 0;
-	
+
 	private boolean playerQuit = false;
-	
+
 	private GameType gametype;
-	
+
 	ArrayList<Player> participants = new ArrayList<Player>();
-	
+
 	@Override
 	public void passGameType(GameType gt){
 		gametype = gt;
@@ -81,7 +84,7 @@ public class TOMB_GD extends Gamedata{
 		s1.update();
 		s2.update();
 	}
-	
+
 	@Override
 	public void addParticipant(Player p) {
 		Initialise.pushStatistics(p);
@@ -110,9 +113,9 @@ public class TOMB_GD extends Gamedata{
 	public void shotHit(Player p, Player target) {
 		shotsHit.put(p, shotsHit.get(p) + 1);
 		virtualHealth.put(target, virtualHealth.get(target) - 1);
-		
+		target.damage(1);
+
 		if(virtualHealth.get(target) <= 0){
-			target.damage(1);
 			kills.put(p, kills.get(p) + 1);
 			deaths.put(target, deaths.get(target) + 1);
 			Warzone.ec.sendColouredMessage(p, "&red[Warzone] &aYou shot &9" + target.getName() + "&a and gained a point!");
@@ -141,7 +144,7 @@ public class TOMB_GD extends Gamedata{
 		}
 		return participants.get(index);
 	}
-	
+
 	@Override
 	public Player getLooser() {
 		int index = 0, score = 1584635, count = 0;
@@ -214,7 +217,7 @@ public class TOMB_GD extends Gamedata{
 		s2.setLine(3, ChatColor.DARK_PURPLE + "" + (gameTime - timer));
 		s1.update();
 		s2.update();
-		
+
 		if(playerQuit && quitter != null){
 			Warzone.inventData.checkFile(quitter);
 			Warzone.inventData.saveInventory(quitter, quitter.getInventory().getContents());
@@ -225,7 +228,7 @@ public class TOMB_GD extends Gamedata{
 				", losses='" + loss + "' WHERE player='" + quitter.getName() + "';";
 				Initialise.core.updateQuery(updateStats);
 			}
-			
+
 			if(!Warzone.quitterHandle.doesExist(quitter)){
 				Warzone.quitterHandle.addQuitter(quitter, previousLocation.get(quitter));
 			} else {
@@ -237,17 +240,17 @@ public class TOMB_GD extends Gamedata{
 			}
 		}
 	}
-	
+
 	@Override public void endGame(int taskid){
 		Player winner = getWinner();
-		
+
 		if(score.get(participants.get(0)) == score.get(participants.get(1))){
 			participants.get(0).sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.GREEN + " The match was a draw!");
 			participants.get(1).sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.GREEN + " The match was a draw!");
 			wasDraw = true;
 			for(Player part : participants){
 				part.teleport(previousLocation.get(part));
-				
+
 				inventmanage.wipeInventory(part);
 				part.getInventory().setContents(invent.get(part));
 				part.getInventory().setArmorContents(inventArmour.get(part));	
@@ -260,7 +263,7 @@ public class TOMB_GD extends Gamedata{
 				part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GOLD + winner.getName() + ChatColor.GREEN + " won with " + ChatColor.BLUE + score.get(winner) +
 						ChatColor.GREEN + " kills to " + ChatColor.BLUE + score.get(getLooser()) + ChatColor.GREEN + " kills.");
 				part.teleport(previousLocation.get(part));
-				
+
 				inventmanage.wipeInventory(part);
 				part.getInventory().setContents(invent.get(part));
 				part.getInventory().setArmorContents(inventArmour.get(part));	
@@ -278,9 +281,9 @@ public class TOMB_GD extends Gamedata{
 		Warzone.mapList.get(MapName.TOMB).setOccupiedState(false);
 		Warzone.server.getScheduler().cancelTask(taskid);
 	}
-	
+
 	public static boolean wasDraw = false;
-	
+
 	@Override public void saveData(ArrayList<Player> partic){
 		for(Player p : partic){
 			int fired = Statistics.totalShotsFired.get(p.getName()) + shotsFired.get(p);
@@ -297,7 +300,7 @@ public class TOMB_GD extends Gamedata{
 			if(!playerQuit){
 				if(wasDraw){
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
-							", draws='" + drew + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
+					", draws='" + drew + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				} else if(getWinner() == p){
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
 					", wins='" + won + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
@@ -308,14 +311,14 @@ public class TOMB_GD extends Gamedata{
 				Initialise.core.updateQuery(updateStats);
 			} else {
 				if(Warzone.server.getPlayer(p.getName()) == null){
-				
+
 				} else {
 					updateStats = "UPDATE statistics SET shotsfired='" + fired + "', shotshit='" + hit + "', shotsmissed='" + missed + "', playtime='" + playTime + "'" +
 					", wins='" + won + "', kills='" + kill + "', deaths='" + death + "', gp='" + gp + "' WHERE player='" + p.getName() + "';";
 				}
 				Initialise.core.updateQuery(updateStats);
 			}
-			
+
 			Initialise.pushStatistics(p);
 		}
 	}
@@ -325,30 +328,104 @@ public class TOMB_GD extends Gamedata{
 		return participants;
 	}
 
+	Preferences pref = new Preferences();
+	ExtrasPlayer ep = new ExtrasPlayer();
+
+	@SuppressWarnings("static-access")
 	@Override
 	public void respawn() {
 		participants.get(0).teleport(Warzone.mapList.get(MapName.TOMB).getSpawnPoints().get(0));
 		participants.get(1).teleport(Warzone.mapList.get(MapName.TOMB).getSpawnPoints().get(1));
-		
+
+
 		participants.get(0).setHealth(20);
 		participants.get(1).setHealth(20);
 
 		inventmanage.wipeInventory(participants.get(0));
 		inventmanage.wipeInventory(participants.get(1));
+
+		Player p1 = participants.get(0), p2 = participants.get(1);
+		
+		switch(pref.armourType.get(participants.get(0).getName())){
+		case NONE: break;
+		case LEATHER:
+		p1.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+		break;
+		case IRON:
+		p1.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+		break;
+		case GOLD:
+		p1.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+		break;
+		case DIAMOND:
+		p1.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+		break;
+		}
+		
+		switch(pref.armourType.get(participants.get(1).getName())){
+		case NONE: break;
+		case LEATHER:
+		p2.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+		break;
+		case IRON:
+		p2.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+		break;
+		case GOLD:
+		p2.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+		break;
+		case DIAMOND:
+		p2.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+		break;
+		}
+		
+		if(pref.blockHead.get(p1.getName()).getType() != Material.AIR){
+			p1.getInventory().setHelmet(null);
+			ep.setBlockOnPlayerHead(p1, pref.blockHead.get(p1.getName()).getType());
+		}
+
+		if(pref.blockHead.get(p2.getName()).getType() != Material.AIR){
+			p2.getInventory().setHelmet(null);
+			ep.setBlockOnPlayerHead(p2, pref.blockHead.get(p2.getName()).getType());
+		}
 		
 		inventmanage.addToInventory(participants.get(0), 261, 1);
 		inventmanage.addToInventory(participants.get(1), 261, 1);
-		
+
 		inventmanage.addToInventory(participants.get(0), 262, 64);
 		inventmanage.addToInventory(participants.get(0), 263, 5);
-		
+
 		inventmanage.addToInventory(participants.get(1), 262, 64);
 		inventmanage.addToInventory(participants.get(1), 263, 5);
 
 		updateSigns();
-		
+
+
 	}
-	
+
 	@Override
 	public void updateSigns(){
 		Player p1 = participants.get(0), p2 = participants.get(1);
@@ -359,12 +436,12 @@ public class TOMB_GD extends Gamedata{
 		s1.update();
 		s2.update();
 	}
-	
+
 	private int gamePoolerID;
 
 	@Override
 	public void initiateScheduler() {
-		// TODO Auto-generated method stub
+		respawn();
 		gamePoolerID = Warzone.server.getScheduler().scheduleSyncRepeatingTask(Warzone.plugin, new Runnable() {	
 			public void run() {
 				tickerTask(gamePoolerID);

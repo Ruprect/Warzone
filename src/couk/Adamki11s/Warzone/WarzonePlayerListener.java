@@ -18,18 +18,22 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.martin.bukkit.npclib.NPCEntity;
 
 import couk.Adamki11s.Database.Initialise;
+import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Extras.Player.ExtrasPlayer;
 import couk.Adamki11s.Games.Gamedata;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.NPC.AINPC;
-import couk.Adamki11s.NPC.NPC_Control;
 import couk.Adamki11s.Warzone.Warzone.MapData;
 
 public class WarzonePlayerListener extends PlayerListener {
 
 	public void onPlayerJoin(PlayerJoinEvent evt){
+		if(!pref.doesPlayerHavePreferenceFile(evt.getPlayer())){
+			pref.createPreferenceFile(evt.getPlayer());
+		}
+		pref.loadPreferences(evt.getPlayer());
 		if(Warzone.inventData.isInNeedOfInventoryLoading(evt.getPlayer())){
 			evt.getPlayer().getInventory().setContents(Warzone.inventData.loadInventory(evt.getPlayer()));
 			Warzone.inventData.checkFile(evt.getPlayer());
@@ -50,6 +54,7 @@ public class WarzonePlayerListener extends PlayerListener {
 	
 	ExtrasInventory invManage = new ExtrasInventory();
 	ExtrasPlayer exP = new ExtrasPlayer();
+	Preferences pref = new Preferences();
 
 	public void onPlayerInteract(PlayerInteractEvent evt){
 		Player player = evt.getPlayer();

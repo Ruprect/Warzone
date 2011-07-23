@@ -143,7 +143,7 @@ public class NPC_Messages {
 		switch(randomMessage){
 		case 0: msg = "Bukkit Administrator!"; break;
 		case 1: msg = "Hey friend :)"; break;
-		case 2: msg = "Don't worry, you're game'll start soon"; break;
+		case 2: msg = "Don't worry, your game'll start soon"; break;
 		
 		}
 		return msg;

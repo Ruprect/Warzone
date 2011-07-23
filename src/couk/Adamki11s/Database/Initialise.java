@@ -4,8 +4,6 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
-
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import com.alta189.sqlLibrary.SQLite.sqlCore;
 
@@ -19,7 +17,8 @@ public class Initialise {
 	databaseRoot = new File(mainDir + File.separator + "Database"),
 	quitterRoot = new File(mainDir + File.separator + "Quitters"),
 	configRoot = new File(mainDir + File.separator + "Configuration"),
-	inventoryRoot = new File(mainDir + File.separator + "Inventory");
+	inventoryRoot = new File(mainDir + File.separator + "Inventory"),
+	preferencesRoot = new File(mainDir + File.separator + "Preferences");
 
 	public void init(){
 		directoryCheck();
@@ -46,6 +45,10 @@ public class Initialise {
 		if(!inventoryRoot.exists()){
 			System.out.println(Warzone.prefix + " Creating Inventory Directory...");
 			inventoryRoot.mkdir();
+		}
+		if(!preferencesRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Preferences Directory...");
+			preferencesRoot.mkdir();
 		}
 	}
 	
@@ -97,6 +100,10 @@ public class Initialise {
 				Statistics.totalKills.put(playername, kills);
 				Statistics.totalDeaths.put(playername, deaths);
 				Statistics.gamesPlayed.put(playername, gamesplayed);
+				float score = getPlayerScore(wins, draws, losses, shotsmissed, kills, deaths);
+				Statistics.playerScore.put(playername, score);
+				int level = getLevel(score);
+				Statistics.playerLevel.put(playername, level);
 			}
 		} catch (SQLException ex){
 			ex.printStackTrace();
@@ -129,11 +136,52 @@ public class Initialise {
 				Statistics.totalKills.put(playername, kills);
 				Statistics.totalDeaths.put(playername, deaths);
 				Statistics.gamesPlayed.put(playername, gamesplayed);
+				float score = getPlayerScore(wins, draws, losses, shotsmissed, kills, deaths);
+				Statistics.playerScore.put(playername, score);
+				int level = getLevel(score);
+				Statistics.playerLevel.put(playername, level);
 			}
 		} catch (SQLException ex){
 			ex.printStackTrace();
 		}
 		System.out.println(Warzone.prefix + " Player data loaded successfully!");
+	}
+	
+	public static int levels[] = {0, 1000, 2500, 5000, 8000, 12000, 17000, 23000, 30000, 38000, 47000,
+			57000, 68000, 80000, 93000, 107000, 122000, 138000, 155000, 173000, 192000,
+			212000, 233000, 255000, 278000, 302000, 327000, 353000, 380000, 408000, 437000,
+			467000, 498000, 530000, 563000, 597000, 632000, 668000, 705000, 743000,
+			782000, 822000, 863000, 905000, 958000, 1002000, 1057000, 1103000, 1150000,
+			1198000, 1277000, 1500000};
+	
+	private static int getLevel(float s){
+		int level = 0;
+		for(int index = 1; index < levels.length; index++){
+			if(s >= levels[index - 1] && s < levels[index]){
+				level = index;
+				break;
+			}
+		}
+		return level;
+	}
+	
+	public static Float getPlayerScore(int wins, int draws, int losses, int shotshit, int kills, int deaths) {
+		/*
+		 * Win = +500
+		 * Draw = +200
+		 * Loss = +50
+		 * ShotHit = +5
+		 * Kill = +30
+		 * Death = +5
+		 */
+		Float score = (float) 0;
+		score += (wins * 500);
+		score += (draws * 200);
+		score += (losses * 50);
+		score += (shotshit * 5);
+		score += (kills * 30);
+		score += (deaths * 5);
+		return score;
 	}
 
 

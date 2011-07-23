@@ -6,9 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.martin.bukkit.npclib.NPCEntity;
-
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Extras.Regions.ExtrasRegions;
 import couk.Adamki11s.Games.Gamedata;

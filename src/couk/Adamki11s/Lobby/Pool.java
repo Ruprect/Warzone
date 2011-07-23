@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Extras.Random.ExtrasRandom;
@@ -22,10 +23,10 @@ public class Pool {
 
 	private static ArrayList<Player> pool = new ArrayList<Player>();
 
-	private static ArrayList<Player> searchers = new ArrayList<Player>();
+	public static ArrayList<Player> searchers = new ArrayList<Player>();
 	private static HashMap<Integer, Player> searcherPlayer = new HashMap<Integer, Player>();
-	private static HashMap<Player, GameType> gameType = new HashMap<Player, GameType>();
-	private static HashMap<Player, Integer> timeoutCount = new HashMap<Player, Integer>();
+	public static HashMap<Player, GameType> gameType = new HashMap<Player, GameType>();
+	public static HashMap<Player, Integer> timeoutCount = new HashMap<Player, Integer>();
 	private static ArrayList<Player> toRemove = new ArrayList<Player>();
 	
 	ExtrasInventory inventoryManage = new ExtrasInventory();
@@ -63,18 +64,17 @@ public class Pool {
 	
 	Player chiller;
 	
-	public void findMatch(Player play, GameType ranked){
-		chiller = play;
-		chilledInLobby.put(play, false);
-		play.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.BLUE + "Chill in the lobby while we find a match for you.");
-		locs.put(play, play.getLocation());
-		
+	public void findMatch(Player play, GameType ranked){		
 		play.teleport(new Location(Maps.Warzone_World, -100, 76, 200,  (float)1.7, (float)-0.14));
 		if(!searchers.contains(play)){
 			searchers.add(play);
 			searcherPlayer.put(searchers.size(), play);
 			gameType.put(play, ranked);
 			timeoutCount.put(play, 0);
+			chiller = play;
+			chilledInLobby.put(play, false);
+			play.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.BLUE + "Chill in the lobby while we find a match for you.");
+			locs.put(play, play.getLocation());
 			if(showTOC){
 				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
 			} else {
@@ -82,7 +82,7 @@ public class Pool {
 			}
 		} else {
 			col.sendColouredMessage(play, "&red[Warzone] You are already searching! ");
-			col.sendColouredMessage(play, "&red[Warzone] Do &e/warzone stop-search &redto cancel");
+			col.sendColouredMessage(play, "&red[Warzone] Do &e/warzone stop search &redto cancel");
 		}
 		if(toRemove.contains(play)){
 			toRemove.remove(play);
@@ -151,7 +151,7 @@ public class Pool {
 	private void chilledInLobby(Player chill){
 		chilledInLobby.put(chill, true);
 	}
-
+	
 	public static Map map;
 	public static Gamedata gd;
 	ExtrasInventory inventmanage = new ExtrasInventory();
@@ -174,14 +174,20 @@ public class Pool {
 		second = searcherPlayer.get(secondPool + 1);
 		if(chilledInLobby.get(first) && chilledInLobby.get(second)){
 			String type = gameType.get(first).toString();
-			col.sendColouredMessage(first, "&red[Warzone] &green" + type + " match found with &9" + second.getName() + "&green!");
-			col.sendColouredMessage(second, "&red[Warzone] &green" + type + " match found with &9" + first.getName() + "&green!");
+			col.sendColouredMessage(first, "&red[Warzone] &green" + type + " match found with &9" + second.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(second.getName())) + " (" +
+					Statistics.playerLevel.get(second.getName()) + ")");
+			col.sendColouredMessage(second, "&red[Warzone] &green" + type + " match found with &9" + first.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(first.getName())) + " (" +
+					Statistics.playerLevel.get(first.getName()) + ")");
 			col.sendColouredMessage(first, "&red[Warzone] &aSelecting random map...");
 			col.sendColouredMessage(second, "&red[Warzone] &aSelecting random map...");
 	
 			if(Warzone.mapList.get(Warzone.MapName.ASCENSION).isOccupied() && Warzone.mapList.get(Warzone.MapName.CASTLE).isOccupied() && Warzone.mapList.get(Warzone.MapName.DUNGEON).isOccupied() &&
 					Warzone.mapList.get(Warzone.MapName.OVERFLOW).isOccupied() && Warzone.mapList.get(Warzone.MapName.PLAINES).isOccupied() && Warzone.mapList.get(Warzone.MapName.TOMB).isOccupied()
-					 && Warzone.mapList.get(Warzone.MapName.JUNGLE).isOccupied() && Warzone.mapList.get(Warzone.MapName.BLIZZARD).isOccupied()){
+					 && Warzone.mapList.get(Warzone.MapName.JUNGLE).isOccupied() && Warzone.mapList.get(Warzone.MapName.BLIZZARD).isOccupied()  && Warzone.mapList.get(Warzone.MapName.BLIND).isOccupied()
+					 && Warzone.mapList.get(Warzone.MapName.CONTAINMENT).isOccupied() && Warzone.mapList.get(Warzone.MapName.AFTERMATH).isOccupied() && Warzone.mapList.get(Warzone.MapName.CRYPT).isOccupied()
+					 && Warzone.mapList.get(Warzone.MapName.HOMETREE).isOccupied() && Warzone.mapList.get(Warzone.MapName.AURORA).isOccupied() && Warzone.mapList.get(Warzone.MapName.ABYSS).isOccupied()
+					 && Warzone.mapList.get(Warzone.MapName.BURROW).isOccupied() && Warzone.mapList.get(Warzone.MapName.LAPUTA).isOccupied() && Warzone.mapList.get(Warzone.MapName.DOME).isOccupied()
+					 && Warzone.mapList.get(Warzone.MapName.NUKETOWN).isOccupied()){
 				col.sendColouredMessage(first, "&red[Warzone] All maps are occupied! Please wait.");
 				col.sendColouredMessage(second, "&red[Warzone] All maps are occupied! Please wait.");
 				searchers.remove(first);
@@ -190,7 +196,7 @@ public class Pool {
 			} else {
 				boolean validmap = false;
 				while(!validmap){
-					int rand = new ExtrasRandom().getRandomInt(8, 0);
+					int rand = new ExtrasRandom().getRandomInt(20, 0);
 					switch(rand){
 						case 0: map = Warzone.mapList.get(MapName.ASCENSION); break;
 						case 1: map = Warzone.mapList.get(MapName.CASTLE); break;
@@ -199,7 +205,18 @@ public class Pool {
 						case 4: map = Warzone.mapList.get(MapName.PLAINES); break;
 						case 5: map = Warzone.mapList.get(MapName.TOMB); break;
 						case 6: map = Warzone.mapList.get(MapName.JUNGLE); break;
-						case 7: map = Warzone.mapList.get(MapName.BLIZZARD); break;
+						case 8: map = Warzone.mapList.get(MapName.BLIZZARD); break;
+						case 9: map = Warzone.mapList.get(MapName.BLIND); break;
+						case 10: map = Warzone.mapList.get(MapName.CONTAINMENT); break;
+						case 11: map = Warzone.mapList.get(MapName.AFTERMATH); break;
+						case 12: map = Warzone.mapList.get(MapName.CRYPT); break;
+						case 13: map = Warzone.mapList.get(MapName.HOMETREE); break;
+						case 14: map = Warzone.mapList.get(MapName.AURORA); break;
+						case 15: map = Warzone.mapList.get(MapName.ABYSS); break;
+						case 16: map = Warzone.mapList.get(MapName.BURROW); break;
+						case 17: map = Warzone.mapList.get(MapName.LAPUTA); break;
+						case 18: map = Warzone.mapList.get(MapName.DOME); break;
+						case 19: map = Warzone.mapList.get(MapName.NUKETOWN); break;
 					}
 					if(!map.isOccupied()){
 						validmap = true;
@@ -226,6 +243,28 @@ public class Pool {
 					gd = Warzone.mapData.get(MapData.JUNGLE);
 				}else if(map.getName().toUpperCase().equals("BLIZZARD")){
 					gd = Warzone.mapData.get(MapData.BLIZZARD);
+				}else if(map.getName().toUpperCase().equals("BLIND")){
+					gd = Warzone.mapData.get(MapData.BLIND);
+				}else if(map.getName().toUpperCase().equals("CONTAINMENT")){
+					gd = Warzone.mapData.get(MapData.CONTAINMENT);
+				}else if(map.getName().toUpperCase().equals("AFTERMATH")){
+					gd = Warzone.mapData.get(MapData.AFTERMATH);
+				}else if(map.getName().toUpperCase().equals("CRYPT")){
+					gd = Warzone.mapData.get(MapData.CRYPT);
+				}else if(map.getName().toUpperCase().equals("HOMETREE")){
+					gd = Warzone.mapData.get(MapData.HOMETREE);
+				}else if(map.getName().toUpperCase().equals("AURORA")){
+					gd = Warzone.mapData.get(MapData.AURORA);
+				}else if(map.getName().toUpperCase().equals("ABYSS")){
+					gd = Warzone.mapData.get(MapData.ABYSS);
+				}else if(map.getName().toUpperCase().equals("BURROW")){
+					gd = Warzone.mapData.get(MapData.BURROW);
+				}else if(map.getName().toUpperCase().equals("LAPUTA")){
+					gd = Warzone.mapData.get(MapData.LAPUTA);
+				}else if(map.getName().toUpperCase().equals("DOME")){
+					gd = Warzone.mapData.get(MapData.DOME);
+				}else if(map.getName().toUpperCase().equals("NUKETOWN")){
+					gd = Warzone.mapData.get(MapData.NUKETOWN);
 				}
 				
 				ArrayList<Player> l = new ArrayList<Player>();
@@ -260,6 +299,72 @@ public class Pool {
 				inventmanage.addToInventory(second, 263, 5);
 				
 				gd.initiateScheduler();	
+				
+				/*switch(Preferences.armourType.get(first.getName())){
+				case NONE: break;
+				case LEATHER:
+				first.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+				first.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+				first.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+				first.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+				break;
+				case IRON:
+				first.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+				first.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+				first.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+				first.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+				break;
+				case GOLD:
+				first.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+				first.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+				first.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+				first.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+				break;
+				case DIAMOND:
+				first.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+				first.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+				first.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+				first.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+				break;
+				}
+				
+				switch(Preferences.armourType.get(second.getName())){
+				case NONE: break;
+				case LEATHER:
+				second.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+				second.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+				second.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+				second.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+				break;
+				case IRON:
+				second.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+				second.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+				second.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+				second.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+				break;
+				case GOLD:
+				second.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+				second.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+				second.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+				second.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+				break;
+				case DIAMOND:
+				second.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+				second.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+				second.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+				second.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+				break;
+				}
+				
+				if(Preferences.blockHead.get(first.getName()).getType() != Material.AIR){
+					first.getInventory().setHelmet(null);
+					new ExtrasPlayer().setBlockOnPlayerHead(first, Preferences.blockHead.get(first.getName()).getType());
+				}
+
+				if(Preferences.blockHead.get(second.getName()).getType() != Material.AIR){
+					second.getInventory().setHelmet(null);
+					new ExtrasPlayer().setBlockOnPlayerHead(second, Preferences.blockHead.get(second.getName()).getType());
+				}*/
 				
 			}
 			

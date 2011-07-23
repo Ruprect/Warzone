@@ -7,7 +7,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 public class DatabaseHandler {
 	/*
@@ -68,12 +67,23 @@ public class DatabaseHandler {
 	
 	public ResultSet sqlQuery(String query) {
 		try {
-			Connection connection = getConnection();
-		    Statement statement = connection.createStatement();
-		    
-		    ResultSet result = statement.executeQuery(query);
-		    
-		    return result;
+			
+			boolean statementProcessed = false;
+			
+			while(!statementProcessed){
+				Connection connection = getConnection();
+				if(!connection.isClosed() && !connection.isReadOnly()){
+				    Statement statement = connection.createStatement();	
+				    try{
+				    	ResultSet result = statement.executeQuery(query);
+				    	return result;
+				    } catch (Exception ex){
+				    	ex.printStackTrace();
+				    }
+				}
+			}
+			
+		return null;
 		} catch (SQLException ex) {
 			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
 				return retryResult(query);
@@ -85,20 +95,37 @@ public class DatabaseHandler {
 		return null;
 	}
 	
-	public void insertQuery(String query) {
+	public boolean insertQuery(String query) {
 		try {
-			Connection connection = getConnection();
-		    Statement statement = connection.createStatement();
-		    
-		    statement.executeQuery(query);
+					
+			boolean statementProcessed = false;
+			
+			while(!statementProcessed){
+				Connection connection = getConnection();
+				if(!connection.isClosed() && !connection.isReadOnly()){
+				    Statement statement = connection.createStatement();	
+				    try{
+				    	statement.executeUpdate(query);
+				    	statementProcessed = true;
+				    	return true;
+				    } catch (Exception ex){
+				    	if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") || ex.getMessage().toLowerCase().contains("transaction")) {
+							retry(query);
+				    	}
+				    }
+				}
+			}
+		  return false;
 		    
 		    
 		} catch (SQLException ex) {
 			
-			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
+			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") || ex.getMessage().toLowerCase().contains("transaction")) {
 				retry(query);
+				return false;
 			}else{
 				if (!ex.toString().contains("not return ResultSet")) core.writeError("Error at SQL INSERT Query: " + ex, false);
+				return false;
 			}
 			
 		}
@@ -117,7 +144,9 @@ public class DatabaseHandler {
 				    	statementProcessed = true;
 				    	return true;
 				    } catch (Exception ex){
-				    	ex.printStackTrace();
+				    	if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") || ex.getMessage().toLowerCase().contains("transaction")) {
+							retry(query);
+				    	}
 				    }
 				}
 			}
@@ -126,11 +155,12 @@ public class DatabaseHandler {
 		} catch (SQLException ex) {
 			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") || ex.getMessage().toLowerCase().contains("transaction")) {
 				retry(query);
+				return false;
 			}else{
 				if (!ex.toString().contains("not return ResultSet")) core.writeError("Error at SQL UPDATE Query: " + ex, false);
+				return false;
 			}
 		}
-		return false;
 	}
 	
 	public void deleteQuery(String query) {
@@ -232,12 +262,7 @@ public class DatabaseHandler {
 			    
 			    return;
 			} catch (SQLException ex) {
-				
-				if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") ) {
-					passed = false;
-				}else{
-					core.writeError("Error at SQL Query: " + ex.getMessage(), false);
-				}
+				return;
 			}
 		}
 		

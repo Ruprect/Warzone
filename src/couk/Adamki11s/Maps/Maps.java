@@ -18,7 +18,7 @@ public class Maps {
 			Warzone.server.createWorld("WarzoneWorld", Environment.NORMAL);
 			Warzone_World = Warzone.server.getWorld("WarzoneWorld");
 			worldFound = true;
-			System.out.println(Warzone.prefix + " World loaded successfully.");
+			System.out.println(Warzone.prefix + " World loaded successfully!");
 		} else {
 			worldFound = false;
 			Logger.getLogger("Warzone").severe("[Warzone] Warzone world not found! Plugin disabled!");

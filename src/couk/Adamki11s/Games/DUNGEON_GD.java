@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import couk.Adamki11s.Database.Initialise;
+import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
+import couk.Adamki11s.Extras.Player.ExtrasPlayer;
 import couk.Adamki11s.Lobby.Pool;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone;
@@ -110,9 +113,9 @@ public class DUNGEON_GD extends Gamedata {
 	public void shotHit(Player p, Player target) {
 		shotsHit.put(p, shotsHit.get(p) + 1);
 		virtualHealth.put(target, virtualHealth.get(target) - 1);
+		target.damage(1);
 		
 		if(virtualHealth.get(target) <= 0){
-			target.damage(1);
 			kills.put(p, kills.get(p) + 1);
 			deaths.put(target, deaths.get(target) + 1);
 			Warzone.ec.sendColouredMessage(p, "&red[Warzone] &aYou shot &9" + target.getName() + "&a and gained a point!");
@@ -325,28 +328,102 @@ Player winner = getWinner();
 		return participants;
 	}
 
+	Preferences pref = new Preferences();
+	ExtrasPlayer ep = new ExtrasPlayer();
+
+	@SuppressWarnings("static-access")
 	@Override
 	public void respawn() {
 		participants.get(0).teleport(Warzone.mapList.get(MapName.DUNGEON).getSpawnPoints().get(0));
 		participants.get(1).teleport(Warzone.mapList.get(MapName.DUNGEON).getSpawnPoints().get(1));
-		
+
+
 		participants.get(0).setHealth(20);
 		participants.get(1).setHealth(20);
 
 		inventmanage.wipeInventory(participants.get(0));
 		inventmanage.wipeInventory(participants.get(1));
+
+		Player p1 = participants.get(0), p2 = participants.get(1);
+		
+		switch(pref.armourType.get(participants.get(0).getName())){
+		case NONE: break;
+		case LEATHER:
+		p1.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+		break;
+		case IRON:
+		p1.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+		break;
+		case GOLD:
+		p1.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+		break;
+		case DIAMOND:
+		p1.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+		p1.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+		p1.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+		p1.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+		break;
+		}
+		
+		switch(pref.armourType.get(participants.get(1).getName())){
+		case NONE: break;
+		case LEATHER:
+		p2.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS, 1));
+		break;
+		case IRON:
+		p2.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+		break;
+		case GOLD:
+		p2.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS, 1));
+		break;
+		case DIAMOND:
+		p2.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET, 1));
+		p2.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+		p2.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
+		p2.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS, 1));
+		break;
+		}
+		
+		if(pref.blockHead.get(p1.getName()).getType() != Material.AIR){
+			p1.getInventory().setHelmet(null);
+			ep.setBlockOnPlayerHead(p1, pref.blockHead.get(p1.getName()).getType());
+		}
+
+		if(pref.blockHead.get(p2.getName()).getType() != Material.AIR){
+			p2.getInventory().setHelmet(null);
+			ep.setBlockOnPlayerHead(p2, pref.blockHead.get(p2.getName()).getType());
+		}
 		
 		inventmanage.addToInventory(participants.get(0), 261, 1);
 		inventmanage.addToInventory(participants.get(1), 261, 1);
-		
+
 		inventmanage.addToInventory(participants.get(0), 262, 64);
 		inventmanage.addToInventory(participants.get(0), 263, 5);
-		
+
 		inventmanage.addToInventory(participants.get(1), 262, 64);
 		inventmanage.addToInventory(participants.get(1), 263, 5);
 
 		updateSigns();
-		
+
+
 	}
 	
 	@Override
@@ -364,7 +441,7 @@ Player winner = getWinner();
 
 	@Override
 	public void initiateScheduler() {
-		// TODO Auto-generated method stub
+		respawn();
 		gamePoolerID = Warzone.server.getScheduler().scheduleSyncRepeatingTask(Warzone.plugin, new Runnable() {	
 			public void run() {
 				tickerTask(gamePoolerID);
