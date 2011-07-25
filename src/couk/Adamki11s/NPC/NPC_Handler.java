@@ -145,9 +145,7 @@ public class NPC_Handler {
 	
 	private Location Adamki11sSpawn = new Location(Maps.Warzone_World, -100.5, 78, 210.7, (float)-181, (float)5.85),
 	                 iPhysXSpawn = new Location(Maps.Warzone_World, -95.3, 78, 210, (float)179.45, (float)4.5),
-	                 alta189Spawn = new Location(Maps.Warzone_World, -105.5, 78, 210, (float)179.45, (float)4.5),
-	                 ESpawn = new Location(Maps.Warzone_World, -90.46, 78, 211.65, (float) 142.10117, (float) 4.2),
-	                 CronikkkSpawn = new Location(Maps.Warzone_World, -110.9, 78, 211.6, (float) 223.7, (float) 4.35);
+	                 alta189Spawn = new Location(Maps.Warzone_World, -105.5, 78, 210, (float)179.45, (float)4.5);
 	
 	private void spawnNPCS(){
 		for(AINPC ref : npcRef){
@@ -158,8 +156,6 @@ public class NPC_Handler {
 		spawnNPC("Adamki11s", Adamki11sSpawn);
 	     spawnNPC("iPhysX", iPhysXSpawn);
 	     spawnNPC("alta189", alta189Spawn);
-	     spawnNPC("Notch", ESpawn);
-	     spawnNPC("cronikkk", CronikkkSpawn);
 		npc.setItemInHand(AINPC.Adamki11s.toString(), Material.DIAMOND_SWORD);
 		npc.setItemInHand(AINPC.Afforess.toString(), Material.BOOK);
 		npc.setItemInHand(AINPC.alta189.toString(), Material.BED);

@@ -5,18 +5,16 @@ import java.io.IOException;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 
-import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone;
 
-public class QuitterHandler {
+public class PlayerReturnHandler {
 	
-	private File mainDir = new File("plugins/Warzone" + File.separator + "Quitters");
+	private File mainDir = new File("plugins/Warzone" + File.separator + "Return");
 	
-	public void addQuitter(Player p, Location l){
+	public void addReturn(Player p, Location l){
 		try {
 			File f = new File(mainDir + File.separator + p.getName() + ".yml");
 			f.createNewFile();
@@ -31,7 +29,7 @@ public class QuitterHandler {
 		}
 	}	
 	
-	public Location getQuitterLocation(Player p){
+	public Location getReturnLocation(Player p){
 		File f = new File(mainDir + File.separator + p.getName() + ".yml");
 		Configuration c = new Configuration(f);
 		c.load();
@@ -40,7 +38,7 @@ public class QuitterHandler {
 		return new Location(w, x, y, z);
 	}
 	
-	public void removeQuitter(Player p){
+	public void removeReturn(Player p){
 		new File(mainDir + File.separator + p.getName() + ".yml").delete();
 	}
 	

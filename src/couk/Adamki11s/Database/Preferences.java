@@ -19,8 +19,8 @@ public class Preferences {
 	
 	File root = new File("plugins/Warzone/Preferences");
 	
-	public boolean doesPlayerHavePreferenceFile(Player p){
-		File pPref = new File(root + File.separator + p.getName() + ".pref");
+	public boolean doesPlayerHavePreferenceFile(String name){
+		File pPref = new File(root + File.separator + name + ".pref");
 		if(pPref.exists()){
 			return true;
 		} else {
@@ -28,10 +28,10 @@ public class Preferences {
 		}
 	}
 	
-	public void createPreferenceFile(Player p){
-		File pref = new File(root + File.separator + p.getName() + ".pref");
+	public void createPreferenceFile(String name){
+		File pref = new File(root + File.separator + name + ".pref");
 		Configuration c = new Configuration(pref);
-		if(!doesPlayerHavePreferenceFile(p)){
+		if(!doesPlayerHavePreferenceFile(name)){
 			try {
 				pref.createNewFile();
 			} catch (IOException e) {
@@ -43,12 +43,12 @@ public class Preferences {
 		}
 	}
 	
-	public void loadPreferences(Player p){
-		File pref = new File(root + File.separator + p.getName() + ".pref");
+	public void loadPreferences(String name){
+		File pref = new File(root + File.separator + name + ".pref");
 		Configuration c = new Configuration(pref);
 		c.load();
-		armourType.put(p.getName().toString(), getArmour(c.getString("Preferences.ArmourType", "NONE")));
-		blockHead.put(p.getName().toString(), new ItemStack((Material.getMaterial(c.getString("Preferences.BlockOnHead", "AIR"))), 1));
+		armourType.put(name.toString(), getArmour(c.getString("Preferences.ArmourType", "NONE")));
+		blockHead.put(name.toString(), new ItemStack((Material.getMaterial(c.getString("Preferences.BlockOnHead", "AIR"))), 1));
 	}
 	
 	ExtrasPlayer ep = new ExtrasPlayer();

@@ -15,9 +15,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import couk.Adamki11s.Database.Initialise;
+import couk.Adamki11s.Database.LobbyPlaceHolder;
+import couk.Adamki11s.Database.PlayerReturnHandler;
 import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Preferences.Armour;
 import couk.Adamki11s.Database.Statistics;
+import couk.Adamki11s.Extras.Regions.ExtrasRegions;
 import couk.Adamki11s.Lobby.Pool;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone;
@@ -28,6 +31,10 @@ public class WarzoneCommands implements CommandExecutor{
 	DecimalFormat lvlFormat = new DecimalFormat("#0");
 	
 	Preferences pref = new Preferences();
+	
+	LobbyPlaceHolder lph = new LobbyPlaceHolder();
+	
+	PlayerReturnHandler prh = new PlayerReturnHandler();
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
@@ -35,27 +42,38 @@ public class WarzoneCommands implements CommandExecutor{
 		if(sender instanceof Player){
 			Player p = (Player)sender;
 			if(label.equalsIgnoreCase("warzone")){
+				
 				if(args.length == 1 && args[0].equalsIgnoreCase("disable")){
-					Warzone.server.getPluginManager().disablePlugin(Warzone.plugin);
-					p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GRAY + " Warzone disabled successfully!");
+					if(p.isOp()){
+						Warzone.server.getPluginManager().disablePlugin(Warzone.plugin);
+						p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GRAY + " Warzone disabled successfully!");
+						return true;
+					} else {
+						p.sendMessage(ChatColor.RED + "[Warzone] You do not have permission to disable Warzone!");
+						return true;
+					}
 				}
 				if(args.length == 2 && args[0].equalsIgnoreCase("search")){
 					if(args[1].equalsIgnoreCase("ranked")){
 						new Pool().findMatch((Player)sender, GameType.RANKED);
+						return true;
 					}
 					if(args[1].equalsIgnoreCase("social")){
 						new Pool().findMatch((Player)sender, GameType.SOCIAL);
+						return true;
 					}
 				}
-				if(args.length == 1 && args[0].equalsIgnoreCase("loc")){
-					p.sendMessage("Yaw : " + p.getLocation().getYaw());
-					p.sendMessage("Pitch : " + p.getLocation().getPitch());
-				}
-				if(args.length == 1 && args[0].equalsIgnoreCase("arena")){
-					p.teleport(new Location(Maps.Warzone_World, -100, 76, 200,  (float)1.7, (float)-0.14));
-				}
-				if(args.length == 1 && args[0].equalsIgnoreCase("kill")){
-					Warzone.npc_handle.despawnNPCS();
+				
+				if(args.length == 1 && args[0].equalsIgnoreCase("return")){
+					if(prh.doesExist(p)){
+						p.teleport(prh.getReturnLocation(p));
+						prh.removeReturn(p);
+						p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Returned to previous location.");
+						return true;
+					} else {
+						p.sendMessage(ChatColor.RED + "[Warzone] No return location exists!");
+						return true;
+					}
 				}
 				
 				if(args.length >= 1 && (args[0].equalsIgnoreCase("stop") || args[0].equalsIgnoreCase("cancel"))){
@@ -64,10 +82,19 @@ public class WarzoneCommands implements CommandExecutor{
 						Pool.gameType.remove(p);
 						Pool.timeoutCount.remove(p);
 						p.teleport(Pool.locs.get(p));
+						Pool.chilledInLobby.put(p, false);
 						Pool.locs.remove(p);
+						if(lph.checkLobby(p)){
+							lph.removeLobbyDumpFile(p);
+						}
+						if(prh.doesExist(p)){
+							prh.removeReturn(p);
+						}
 						p.sendMessage(ChatColor.RED + "[Warzone] Search cancelled successfully.");
+						return true;
 					} else {
 						p.sendMessage(ChatColor.RED + "[Warzone] You are not searching for a game!");
+						return true;
 					}
 				}
 				
@@ -75,6 +102,7 @@ public class WarzoneCommands implements CommandExecutor{
 					if(args[1].equalsIgnoreCase("armour")){
 						Armour a = pref.getArmour(args[2].toString());
 						pref.modifyArmourPreference(p, a);
+						return true;
 					}
 					if(args[1].equalsIgnoreCase("blockhead") || args[1].equalsIgnoreCase("block")){
 						int id = 0;
@@ -115,7 +143,8 @@ public class WarzoneCommands implements CommandExecutor{
 							}
 						}
 					}
-					
+
+					return true;
 				}
 				
 				if(args.length == 1 && args[0].equalsIgnoreCase("stats")){
@@ -167,6 +196,8 @@ public class WarzoneCommands implements CommandExecutor{
 					}
 					
 					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Statistics]" + ChatColor.GRAY + "[" + p.getName() + "]");
+
+					return true;
 				} else if(args.length == 2 && args[0].equalsIgnoreCase("stats")){
 					String name = args[1];
 					
@@ -216,6 +247,8 @@ public class WarzoneCommands implements CommandExecutor{
 						p.sendMessage(ChatColor.RED + "Error : " + ChatColor.DARK_AQUA + name + ChatColor.GRAY + " has no statistics to display!");
 					}
 					p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Statistics]" + ChatColor.GRAY + "[" + name + "]");
+
+					return true;
 				} else if(args.length == 3 && args[0].equalsIgnoreCase("stats")){
 					String p1 = args[1], p2 = args[2];
 					if(Statistics.gamesPlayed.containsKey(p1) && Statistics.gamesPlayed.get(p1) > 0){
@@ -246,12 +279,12 @@ public class WarzoneCommands implements CommandExecutor{
 							
 							p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Statistics]" + ChatColor.GRAY + "[" + p1 + "]" + "[" + p2 + "]");
 							
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "Games Played : " + ChatColor.GREEN + Statistics.gamesPlayed.get(p1) + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "Games Played : " + ChatColor.GREEN + Statistics.gamesPlayed.get(p2));
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "Level : " + ChatColor.GREEN + lvlFormat.format(level1) + " (" + lvlFormat.format(level1) + "/50)" + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "Level : " + ChatColor.GREEN + lvlFormat.format(level2) + " (" + lvlFormat.format(level2) + "/50)");
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "Exp Gained : " + ChatColor.GREEN + (int)points1 + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "Exp Gained : " + ChatColor.GREEN + (int)points2);
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "Accuracy : " + ChatColor.GREEN + formatter.format(accuracy1) + "%" + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "Accuracy : " + ChatColor.GREEN + formatter.format(accuracy2) + "%");
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "K/D Ratio : " + ChatColor.GREEN + kdFormat.format(KDR1) + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "K/D Ratio : " + ChatColor.GREEN + kdFormat.format(KDR2));
-							p.sendMessage(ChatColor.GRAY + "[" + p1 + "]" + ChatColor.DARK_AQUA + "W/L Ratio : " + ChatColor.GREEN + kdFormat.format(WLR1) + ChatColor.GRAY + " [" + p2 + "]" + ChatColor.DARK_AQUA + "W/L Ratio : " + ChatColor.GREEN + kdFormat.format(WLR2));
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "Games Played : " + ChatColor.GREEN + Statistics.gamesPlayed.get(p1) + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "Games Played : " + ChatColor.GREEN + Statistics.gamesPlayed.get(p2));
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "Level : " + ChatColor.GREEN + lvlFormat.format(level1) + " (" + lvlFormat.format(level1) + "/50)" + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "Level : " + ChatColor.GREEN + lvlFormat.format(level2) + " (" + lvlFormat.format(level2) + "/50)");
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "Exp Gained : " + ChatColor.GREEN + (int)points1 + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "Exp Gained : " + ChatColor.GREEN + (int)points2);
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "Accuracy : " + ChatColor.GREEN + formatter.format(accuracy1) + "%" + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "Accuracy : " + ChatColor.GREEN + formatter.format(accuracy2) + "%");
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "K/D Ratio : " + ChatColor.GREEN + kdFormat.format(KDR1) + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "K/D Ratio : " + ChatColor.GREEN + kdFormat.format(KDR2));
+							p.sendMessage(ChatColor.GRAY + "[" + p1 + "] " + ChatColor.DARK_AQUA + "W/L Ratio : " + ChatColor.GREEN + kdFormat.format(WLR1) + ChatColor.GRAY + " [" + p2 + "] " + ChatColor.DARK_AQUA + "W/L Ratio : " + ChatColor.GREEN + kdFormat.format(WLR2));
 						
 							p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.YELLOW + "[Statistics]" + ChatColor.GRAY + "[" + p1 + "]" + "[" + p2 + "]");
 							
@@ -263,20 +296,11 @@ public class WarzoneCommands implements CommandExecutor{
 						p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.DARK_AQUA + p1 + ChatColor.RED + " has no statistics to display.");
 						return true;
 					}
-				}
-				
-				if(args.length >= 1 && args[0].equalsIgnoreCase("sign")){
-					World w = p.getWorld();
-					double x = Double.parseDouble(args[1]), y = Double.parseDouble(args[2]), z = Double.parseDouble(args[3]);
-					Location loc = new Location(w, x, y, z);
-					Sign s = (Sign)w.getBlockAt(loc).getState();
-					for(String line : s.getLines()){
-						System.out.println(line);
-					}
+					return true;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 }

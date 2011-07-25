@@ -130,6 +130,7 @@ public class Warzone extends JavaPlugin {
 		pdl.loadPoolingData();
 		getCommand("warzone").setExecutor(new WarzoneCommands());
 		if(Maps.worldFound){
+			log.info("[Warzone] By Adamki11s of the MineDev team.");
 			log.info(prefix + " Warzone, version " + version + " enabled successfully!");
 		}
 		

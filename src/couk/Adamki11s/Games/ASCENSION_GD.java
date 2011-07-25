@@ -71,7 +71,7 @@ public class ASCENSION_GD extends Gamedata {
 			shotsHit.put(p, 0);
 			shotsFired.put(p, 0);
 			shotsMissed.put(p, 0);
-			virtualHealth.put(p, 3);
+			virtualHealth.put(p, 5);
 		}
 		s1.setLine(0, ChatColor.DARK_GREEN + "YOU : 0");
 		s1.setLine(1, ChatColor.RED + "THEM : 0");
@@ -120,8 +120,8 @@ public class ASCENSION_GD extends Gamedata {
 			deaths.put(target, deaths.get(target) + 1);
 			Warzone.ec.sendColouredMessage(p, "&red[Warzone] &aYou shot &9" + target.getName() + "&a and gained a point!");
 			Warzone.ec.sendColouredMessage(target, "&red[Warzone] &aYou got shot by &9" + p.getName() + "!");
-			virtualHealth.put(target, 3);
-			virtualHealth.put(p, 3);
+			virtualHealth.put(target, 5);
+			virtualHealth.put(p, 5);
 			incrementPlayerScore(p);
 			respawn();
 		}
@@ -192,7 +192,7 @@ public class ASCENSION_GD extends Gamedata {
 			timer++;
 			if((timer % 10) == 0){
 				for(Player pp : participants){
-					if(virtualHealth.get(pp) < 3){
+					if(virtualHealth.get(pp) < 5){
 						virtualHealth.put(pp, virtualHealth.get(pp) + 1);
 					}
 				}
@@ -241,6 +241,22 @@ public class ASCENSION_GD extends Gamedata {
 	}
 	
 	public static boolean wasDraw = false;
+
+	private Float getPlayerScore(int shotshit, int kills, int deaths) {
+		/*
+		 * Win = +500
+		 * Draw = +200
+		 * Loss = +50
+		 * ShotHit = +5
+		 * Kill = +30
+		 * Death = +5
+		 */
+		Float score = (float) 0;
+		score += (shotshit * 5);
+		score += (kills * 30);
+		score += (deaths * 5);
+		return score;
+	}
 	
 	@Override public void endGame(int taskid){
 		Player winner = getWinner();
@@ -256,6 +272,7 @@ public class ASCENSION_GD extends Gamedata {
 				part.getInventory().setContents(invent.get(part));
 				part.getInventory().setArmorContents(inventArmour.get(part));	
 				inventmanage.sortInventory(part);
+				part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "You gained " + ChatColor.DARK_AQUA + (getPlayerScore(shotsHit.get(part), kills.get(part), deaths.get(part)) + 250) + ChatColor.GREEN + " exp!");
 			}
 		} else {
 			for(Player part : participants){
@@ -263,6 +280,11 @@ public class ASCENSION_GD extends Gamedata {
 				part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GOLD + winner.getName() + ChatColor.GREEN + " was victorious!");
 				part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GOLD + winner.getName() + ChatColor.GREEN + " won with " + ChatColor.BLUE + score.get(winner) +
 						ChatColor.GREEN + " kills to " + ChatColor.BLUE + score.get(getLooser()) + ChatColor.GREEN + " kills.");
+				if(getLooser() == part){
+					part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "You gained " + ChatColor.DARK_AQUA + (getPlayerScore(shotsHit.get(part), kills.get(part), deaths.get(part)) + 50) + ChatColor.GREEN + " exp!");
+				} else if(getWinner() == part){
+					part.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "You gained " + ChatColor.DARK_AQUA + (getPlayerScore(shotsHit.get(part), kills.get(part), deaths.get(part)) + 500) + ChatColor.GREEN + " exp!");
+				}
 				part.teleport(previousLocation.get(part));
 				
 				inventmanage.wipeInventory(part);

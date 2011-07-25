@@ -4,21 +4,28 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+
 import org.bukkit.entity.Player;
+
 import com.alta189.sqlLibrary.SQLite.sqlCore;
 
 import couk.Adamki11s.Warzone.Warzone;
 
+
 public class Initialise {
 
 	public static sqlCore core;
+	
+	static Preferences pp = new Preferences();
 
 	private File mainDir = new File("plugins/Warzone"),
 	databaseRoot = new File(mainDir + File.separator + "Database"),
 	quitterRoot = new File(mainDir + File.separator + "Quitters"),
 	configRoot = new File(mainDir + File.separator + "Configuration"),
 	inventoryRoot = new File(mainDir + File.separator + "Inventory"),
-	preferencesRoot = new File(mainDir + File.separator + "Preferences");
+	preferencesRoot = new File(mainDir + File.separator + "Preferences"),
+	lobbyRoot = new File(mainDir + File.separator + "Lobby"),
+	playerRetRoot = new File(mainDir + File.separator + "Return");
 
 	public void init(){
 		directoryCheck();
@@ -49,6 +56,14 @@ public class Initialise {
 		if(!preferencesRoot.exists()){
 			System.out.println(Warzone.prefix + " Creating Preferences Directory...");
 			preferencesRoot.mkdir();
+		}
+		if(!lobbyRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Lobby Directory...");
+			lobbyRoot.mkdir();
+		}
+		if(!playerRetRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Return Directory...");
+			playerRetRoot.mkdir();
 		}
 	}
 	
@@ -100,10 +115,13 @@ public class Initialise {
 				Statistics.totalKills.put(playername, kills);
 				Statistics.totalDeaths.put(playername, deaths);
 				Statistics.gamesPlayed.put(playername, gamesplayed);
-				float score = getPlayerScore(wins, draws, losses, shotsmissed, kills, deaths);
+				float score = getPlayerScore(wins, draws, losses, shotshit, kills, deaths);
 				Statistics.playerScore.put(playername, score);
 				int level = getLevel(score);
 				Statistics.playerLevel.put(playername, level);
+				if(pp.doesPlayerHavePreferenceFile(playername)){
+					pp.loadPreferences(playername);
+				}	
 			}
 		} catch (SQLException ex){
 			ex.printStackTrace();
@@ -140,6 +158,9 @@ public class Initialise {
 				Statistics.playerScore.put(playername, score);
 				int level = getLevel(score);
 				Statistics.playerLevel.put(playername, level);
+				if(pp.doesPlayerHavePreferenceFile(playername)){
+					pp.loadPreferences(playername);
+				}
 			}
 		} catch (SQLException ex){
 			ex.printStackTrace();
@@ -181,6 +202,7 @@ public class Initialise {
 		score += (shotshit * 5);
 		score += (kills * 30);
 		score += (deaths * 5);
+		score -= 790;
 		return score;
 	}
 

@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.martin.bukkit.npclib.NPCEntity;
 
 import couk.Adamki11s.Database.Initialise;
+import couk.Adamki11s.Database.LobbyPlaceHolder;
 import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
@@ -28,12 +29,20 @@ import couk.Adamki11s.NPC.AINPC;
 import couk.Adamki11s.Warzone.Warzone.MapData;
 
 public class WarzonePlayerListener extends PlayerListener {
+	
+	LobbyPlaceHolder lph = new LobbyPlaceHolder();
 
 	public void onPlayerJoin(PlayerJoinEvent evt){
-		if(!pref.doesPlayerHavePreferenceFile(evt.getPlayer())){
-			pref.createPreferenceFile(evt.getPlayer());
+		if(lph.checkLobby(evt.getPlayer())){
+			evt.getPlayer().teleport(lph.getLobbyDump(evt.getPlayer()));
+			lph.removeLobbyDumpFile(evt.getPlayer());
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] You quit unexpectedly!");
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] Returned to previous location.");
 		}
-		pref.loadPreferences(evt.getPlayer());
+		if(!pref.doesPlayerHavePreferenceFile(evt.getPlayer().getName())){
+			pref.createPreferenceFile(evt.getPlayer().getName());
+		}
+		pref.loadPreferences(evt.getPlayer().getName());
 		if(Warzone.inventData.isInNeedOfInventoryLoading(evt.getPlayer())){
 			evt.getPlayer().getInventory().setContents(Warzone.inventData.loadInventory(evt.getPlayer()));
 			Warzone.inventData.checkFile(evt.getPlayer());
