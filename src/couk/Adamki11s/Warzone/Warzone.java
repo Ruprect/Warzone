@@ -1,6 +1,8 @@
 package couk.Adamki11s.Warzone;
 
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -14,31 +16,36 @@ import org.martin.bukkit.npclib.NPCManager;
 import couk.Adamki11s.Commands.WarzoneCommands;
 import couk.Adamki11s.Database.Initialise;
 import couk.Adamki11s.Database.InventoryData;
+import couk.Adamki11s.Database.LanguageConfiguration;
 import couk.Adamki11s.Database.MapDataLoader;
+import couk.Adamki11s.Database.PermissionsCore;
 import couk.Adamki11s.Database.PoolDataLoader;
 import couk.Adamki11s.Database.QuitterHandler;
 import couk.Adamki11s.Database.Ranks;
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
-import couk.Adamki11s.Games.ABYSS_GD;
-import couk.Adamki11s.Games.AFTERMATH_GD;
-import couk.Adamki11s.Games.ASCENSION_GD;
-import couk.Adamki11s.Games.AURORA_GD;
-import couk.Adamki11s.Games.BLIND_GD;
-import couk.Adamki11s.Games.BLIZZARD_GD;
-import couk.Adamki11s.Games.BURROW_GD;
-import couk.Adamki11s.Games.CASTLE_GD;
-import couk.Adamki11s.Games.CONTAINMENT_GD;
-import couk.Adamki11s.Games.CRYPT_GD;
-import couk.Adamki11s.Games.DOME_GD;
-import couk.Adamki11s.Games.DUNGEON_GD;
-import couk.Adamki11s.Games.Gamedata;
-import couk.Adamki11s.Games.HOMETREE_GD;
-import couk.Adamki11s.Games.JUNGLE_GD;
-import couk.Adamki11s.Games.LAPUTA_GD;
-import couk.Adamki11s.Games.NUKETOWN_GD;
-import couk.Adamki11s.Games.OVERFLOW_GD;
-import couk.Adamki11s.Games.PLAINES_GD;
-import couk.Adamki11s.Games.TOMB_GD;
+import couk.Adamki11s.Games.Solo.ABYSS_GD;
+import couk.Adamki11s.Games.Solo.AFTERMATH_GD;
+import couk.Adamki11s.Games.Solo.ASCENSION_GD;
+import couk.Adamki11s.Games.Solo.AURORA_GD;
+import couk.Adamki11s.Games.Solo.BLIND_GD;
+import couk.Adamki11s.Games.Solo.BLIZZARD_GD;
+import couk.Adamki11s.Games.Solo.BURROW_GD;
+import couk.Adamki11s.Games.Solo.CASTLE_GD;
+import couk.Adamki11s.Games.Solo.CONTAINMENT_GD;
+import couk.Adamki11s.Games.Solo.CRYPT_GD;
+import couk.Adamki11s.Games.Solo.DOME_GD;
+import couk.Adamki11s.Games.Solo.DUNGEON_GD;
+import couk.Adamki11s.Games.Solo.Gamedata;
+import couk.Adamki11s.Games.Solo.HOMETREE_GD;
+import couk.Adamki11s.Games.Solo.JUNGLE_GD;
+import couk.Adamki11s.Games.Solo.LAPUTA_GD;
+import couk.Adamki11s.Games.Solo.NUKETOWN_GD;
+import couk.Adamki11s.Games.Solo.OVERFLOW_GD;
+import couk.Adamki11s.Games.Solo.PLAINES_GD;
+import couk.Adamki11s.Games.Solo.TOMB_GD;
+import couk.Adamki11s.Languages.LangInterface;
+import couk.Adamki11s.Languages.LangInterface.Langs;
+import couk.Adamki11s.Lobby.ArenaConfig;
 import couk.Adamki11s.Maps.ABYSS;
 import couk.Adamki11s.Maps.AFTERMATH;
 import couk.Adamki11s.Maps.ASCENSION;
@@ -87,6 +94,8 @@ public class Warzone extends JavaPlugin {
 	public static NPC_Control npc;
 	
 	public static ExtrasColour ec = new ExtrasColour();
+	
+	public static boolean doNPCSpawn = false;
 
 	@Override
 	public void onDisable() {
@@ -99,6 +108,12 @@ public class Warzone extends JavaPlugin {
 	Maps mapsClass = new Maps();
 	
 	Ranks rnks = new Ranks();
+	
+	PermissionsCore pc = new PermissionsCore();
+	
+	public static LangInterface li;
+	
+	private LanguageConfiguration langConfig = new LanguageConfiguration();
 
 	@Override
 	public void onEnable() {
@@ -121,29 +136,37 @@ public class Warzone extends JavaPlugin {
 		pm.registerEvent(Type.BLOCK_FORM, new WarzoneBlockListener(), Priority.Highest, this);
 		pm.registerEvent(Type.LEAVES_DECAY, new WarzoneBlockListener(), Priority.Highest, this);
 		pm.registerEvent(Type.PLAYER_INTERACT_ENTITY, new WarzonePlayerListener(), Priority.Highest, this);
+		pc.setupPermissions();
 		new Initialise().init();
 		mapsClass.initi();
+		langConfig.setup();
+		li = new LangInterface(langConfig.loadLang());
 		loadMaps();
 		loadData();
+		new ArenaConfig().createAC();
 		rnks.initialiseRanks();
 		mdl.loadMapData();
 		pdl.loadPoolingData();
 		getCommand("warzone").setExecutor(new WarzoneCommands());
 		if(Maps.worldFound){
-			log.info("[Warzone] By Adamki11s of the MineDev team.");
-			log.info(prefix + " Warzone, version " + version + " enabled successfully!");
+			log.info(li.getObj("[Warzone] By Adamki11s of the MineDev team."));
+			log.info(prefix + " Warzone," + li.getObj("version") + version + " " + li.getObj("enabled successfully") + "!");
 		}
 		
-		npc = new NPC_Control(this, npcManage);
-		npc_handle = new NPC_Handler(npcManage, npc);
+		if(doNPCSpawn){
 		
-
-		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Warzone.plugin, new Runnable() {
-
-            public void run() {
-        		npc_handle.enableNPCAIController();
-            }
-        }, 100L);
+			npc = new NPC_Control(this, npcManage);
+			npc_handle = new NPC_Handler(npcManage, npc);
+			npc_handle.spawnNPCS();
+	
+			/*Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Warzone.plugin, new Runnable() {
+	
+	            public void run() {
+	        		npc_handle.enableNPCAIController();
+	            }
+	        }, 100L);*/
+		
+		}
 		
 	}
 	

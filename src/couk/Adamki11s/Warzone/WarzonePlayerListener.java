@@ -9,6 +9,7 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -23,7 +24,7 @@ import couk.Adamki11s.Database.Preferences;
 import couk.Adamki11s.Database.Statistics;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Extras.Player.ExtrasPlayer;
-import couk.Adamki11s.Games.Gamedata;
+import couk.Adamki11s.Games.Solo.Gamedata;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.NPC.AINPC;
 import couk.Adamki11s.Warzone.Warzone.MapData;
@@ -36,8 +37,8 @@ public class WarzonePlayerListener extends PlayerListener {
 		if(lph.checkLobby(evt.getPlayer())){
 			evt.getPlayer().teleport(lph.getLobbyDump(evt.getPlayer()));
 			lph.removeLobbyDumpFile(evt.getPlayer());
-			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] You quit unexpectedly!");
-			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] Returned to previous location.");
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You quit unexpectedly!"));
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("Returned to previous location."));
 		}
 		if(!pref.doesPlayerHavePreferenceFile(evt.getPlayer().getName())){
 			pref.createPreferenceFile(evt.getPlayer().getName());
@@ -46,7 +47,7 @@ public class WarzonePlayerListener extends PlayerListener {
 		if(Warzone.inventData.isInNeedOfInventoryLoading(evt.getPlayer())){
 			evt.getPlayer().getInventory().setContents(Warzone.inventData.loadInventory(evt.getPlayer()));
 			Warzone.inventData.checkFile(evt.getPlayer());
-			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Inventory was restored successfully.");
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + Warzone.li.getObj("Inventory was restored successfully."));
 		}
 		if(!Statistics.databaseHoldings.contains(evt.getPlayer().getName())){
 			Initialise.core.insertQuery("INSERT INTO statistics (player, wins, draws, losses, shotsfired, shotshit, shotsmissed, kills, deaths, playtime, gp)" +
@@ -56,7 +57,7 @@ public class WarzonePlayerListener extends PlayerListener {
 		Initialise.pushStatistics(evt.getPlayer());
 		if(Warzone.quitterHandle.doesExist(evt.getPlayer())){
 			evt.getPlayer().teleport(Warzone.quitterHandle.getQuitterLocation(evt.getPlayer()));
-			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] You quit during a game! Returned to initial location.");
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You quit during a game! Returned to initial location."));
 			Warzone.quitterHandle.removeQuitter(evt.getPlayer());
 		}
 	}

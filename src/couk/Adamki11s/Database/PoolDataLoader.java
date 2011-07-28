@@ -13,6 +13,7 @@ public class PoolDataLoader {
 		Pool.timeout_Count = poolTimes.getPropertyInteger("TimeoutCount");
 		Pool.sendSearchMessageEvery_XSeconds = poolTimes.getPropertyInteger("SearchMessageDialogueDisplayRate");
 		Pool.showTOC = poolTimes.getPropertyBoolean("ShowTOC");
+		CoreConfiguration.coalAMT = poolTimes.getPropertyInteger("CoalAmount");
 		System.out.println("[Warzone] Matchmaking configuration loaded successfully!");
 	}
 

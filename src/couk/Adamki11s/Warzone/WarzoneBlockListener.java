@@ -13,14 +13,14 @@ public class WarzoneBlockListener extends BlockListener {
 	
 	public void onBlockBreak(BlockBreakEvent evt){
 		if(evt.getPlayer().getWorld() == Maps.Warzone_World){
-		evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] The warzone world is not editable!");
+		evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("The warzone world is not editable!"));
 		evt.setCancelled(true);
 	}
 	}
 	
 	public void onBlockPlace(BlockPlaceEvent evt){
 		if(evt.getPlayer().getWorld() == Maps.Warzone_World){
-			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] The warzone world is not editable!");
+			evt.getPlayer().sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("The warzone world is not editable!"));
 			evt.setCancelled(true);
 		}
 	}

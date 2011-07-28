@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityListener;
 import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Extras.Regions.ExtrasRegions;
-import couk.Adamki11s.Games.Gamedata;
+import couk.Adamki11s.Games.Solo.Gamedata;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone.MapData;
 
@@ -18,11 +18,11 @@ public class WarzoneEntityListener extends EntityListener {
 	ExtrasRegions exr = new ExtrasRegions();
 	
 	public void onEntityDamage(EntityDamageEvent evt){
-		if(evt.getEntity().getWorld() == Maps.Warzone_World){
-			evt.setCancelled(true);
-		}
+		//Damage of 4 == Arrow hit
+		//Damage of 5+ must be sword
+		boolean needtocancel = true;
+		
 		if (evt instanceof EntityDamageByEntityEvent) {
-			
 			Entity e = evt.getEntity();
 			Entity damaged = ((EntityDamageByEntityEvent)evt).getDamager();
 			
@@ -36,11 +36,21 @@ public class WarzoneEntityListener extends EntityListener {
 								EntityDamageByEntityEvent edbee = (EntityDamageByEntityEvent)evt;
 								Player damager = (Player) edbee.getDamager();
 								Player target = (Player) edbee.getEntity();
-								gd.shotHit(damager, target);
+								needtocancel = false;
+								if(evt.getDamage() >= 5){
+									gd.swordStruck(damager, target);
+								} else {
+									gd.shotHit(damager, target);
+								}
+								evt.setDamage(1);
 						}
 					}
 				}
 			}
+		}
+		
+		if(evt.getEntity().getWorld() == Maps.Warzone_World && needtocancel){
+			evt.setCancelled(true);
 		}
 	}
 

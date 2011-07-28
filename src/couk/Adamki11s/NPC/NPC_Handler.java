@@ -147,17 +147,19 @@ public class NPC_Handler {
 	                 iPhysXSpawn = new Location(Maps.Warzone_World, -95.3, 78, 210, (float)179.45, (float)4.5),
 	                 alta189Spawn = new Location(Maps.Warzone_World, -105.5, 78, 210, (float)179.45, (float)4.5);
 	
-	private void spawnNPCS(){
-		for(AINPC ref : npcRef){
+	public void spawnNPCS(){
+		/*for(AINPC ref : npcRef){
 			String r = ref.toString();
 			Location l = getRandomSpawn();
 			spawnNPC(r, l);
-		}
+		}*/
 		spawnNPC("Adamki11s", Adamki11sSpawn);
 	     spawnNPC("iPhysX", iPhysXSpawn);
 	     spawnNPC("alta189", alta189Spawn);
 		npc.setItemInHand(AINPC.Adamki11s.toString(), Material.DIAMOND_SWORD);
-		npc.setItemInHand(AINPC.Afforess.toString(), Material.BOOK);
+		npc.setItemInHand(AINPC.alta189.toString(), Material.GOLD_SWORD);
+		npc.setItemInHand(AINPC.iPhysX.toString(), Material.GOLD_SWORD);
+		/*npc.setItemInHand(AINPC.Afforess.toString(), Material.BOOK);
 		npc.setItemInHand(AINPC.alta189.toString(), Material.BED);
 		npc.setItemInHand(AINPC.cronikkk.toString(), Material.EGG);
 		npc.setItemInHand(AINPC.Dinnerbone.toString(), Material.BEDROCK);
@@ -169,7 +171,7 @@ public class NPC_Handler {
 		npc.setItemInHand(AINPC.Israphel.toString(), Material.GREEN_RECORD);
 		npc.setItemInHand(AINPC.Xephos.toString(), Material.LAPIS_BLOCK);
 		npc.setItemInHand(AINPC.Notch.toString(), Material.GOLDEN_APPLE);
-		npc.setItemInHand(AINPC.RightLegRed.toString(), Material.PUMPKIN);
+		npc.setItemInHand(AINPC.RightLegRed.toString(), Material.PUMPKIN);*/
 		
 	}
 	

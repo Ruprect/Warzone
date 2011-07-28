@@ -22,7 +22,7 @@ public class BURROW extends Map {
 	public ArrayList<Location> getSpawnPoints() {
 		ArrayList<Location> loc = new ArrayList<Location>();
 		loc.add(new Location(Maps.Warzone_World, 50.5, 117.6, 489.6, (float)1.12, (float)1.04));
-		loc.add(new Location(Maps.Warzone_World, 50.4, 124, 534.7, (float)-177.6, (float)0.74));
+		loc.add(new Location(Maps.Warzone_World, 50.6, 125, 531.7, (float)179.6, (float)-4.03));
 		return loc;
 	}
 

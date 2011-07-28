@@ -5,9 +5,13 @@ import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.entity.CraftArrow;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import couk.Adamki11s.Database.CoreConfiguration;
 import couk.Adamki11s.Database.LobbyPlaceHolder;
 import couk.Adamki11s.Database.PlayerReturnHandler;
 import couk.Adamki11s.Database.Statistics;
@@ -15,7 +19,7 @@ import couk.Adamki11s.Extras.Colour.ExtrasColour;
 import couk.Adamki11s.Extras.Inventory.ExtrasInventory;
 import couk.Adamki11s.Extras.Random.ExtrasRandom;
 import couk.Adamki11s.Extras.Regions.ExtrasRegions;
-import couk.Adamki11s.Games.Gamedata;
+import couk.Adamki11s.Games.Solo.Gamedata;
 import couk.Adamki11s.Maps.Map;
 import couk.Adamki11s.Maps.Maps;
 import couk.Adamki11s.Warzone.Warzone;
@@ -85,17 +89,17 @@ public class Pool {
 			chiller = play;
 			chilledInLobby.put(play, false);
 			lph.createLobbyFile(play, play.getLocation());
-			play.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.BLUE + "Chill in the lobby while we find a match for you.");
+			play.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.BLUE + Warzone.li.getObj("Chill in the lobby while we find a match for you."));
 			locs.put(play, play.getLocation());
 			play.teleport(new Location(Maps.Warzone_World, -100, 76, 200,  (float)1.7, (float)-0.14));
 			if(showTOC){
-				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
+				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : " + Warzone.li.getObj("Searching for players...")));
 			} else {
-				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : Searching for players..."));
+				col.sendColouredMessage(play, ("&red[Warzone] &green" + ranked.toString() + " : " + Warzone.li.getObj("Searching for players...")));
 			}
 		} else {
-			col.sendColouredMessage(play, "&red[Warzone] You are already searching! ");
-			col.sendColouredMessage(play, "&red[Warzone] Do &e/warzone stop search &redto cancel");
+			col.sendColouredMessage(play, "&red[Warzone] " + Warzone.li.getObj("You are already searching!"));
+			col.sendColouredMessage(play, "&red[Warzone] " + Warzone.li.getObj("Do &e/warzone stop search &redto cancel"));
 		}
 		if(toRemove.contains(play)){
 			toRemove.remove(play);
@@ -116,7 +120,7 @@ public class Pool {
 								broken = true;
 								if(!toRemove.contains(p)){
 									toRemove.add(p);
-									col.sendColouredMessage(p, "&red[Warzone]&e " + type + " :&red No players found, request timed out.");
+									col.sendColouredMessage(p, "&red[Warzone]&e " + type + " :&red " + Warzone.li.getObj("No players found, request timed out."));
 									prh.removeReturn(p);
 									if(lph.checkLobby(p)){
 										lph.removeLobbyDumpFile(p);
@@ -128,9 +132,9 @@ public class Pool {
 							if(((toc % sendSearchMessageEvery_XSeconds) == 0) && !broken){
 								searcher = searcherPlayer.get(index);
 								if(showTOC){
-									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : Searching for players... &redTimeout in : &e" + (timeout_Count - timeoutCount.get(searcher))));
+									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : " + Warzone.li.getObj("Searching for players...") + " &red " + Warzone.li.getObj("Timeout in") + " : &e" + (timeout_Count - timeoutCount.get(searcher))));
 								} else {
-									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : Searching for players..."));
+									col.sendColouredMessage(searcher, ("&red[Warzone] &green" + type + " : " + Warzone.li.getObj("Searching for players...")));
 								}
 							}
 						}	
@@ -169,7 +173,7 @@ public class Pool {
 		chilledInLobby.put(chill, true);
 	}
 	
-	public static Map map;
+	private static Map map;
 	public static Gamedata gd;
 	ExtrasInventory inventmanage = new ExtrasInventory();
 	
@@ -223,12 +227,12 @@ public class Pool {
 				lph.removeLobbyDumpFile(first);
 				lph.removeLobbyDumpFile(second);
 				String type = gameType.get(first).toString();
-				col.sendColouredMessage(first, "&red[Warzone] &green" + type + " match found with &9" + second.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(second.getName())) + " (" +
+				col.sendColouredMessage(first, "&red[Warzone] &green" + type + " " + Warzone.li.getObj("match found with") + " &9" + second.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(second.getName())) + " (" +
 						Statistics.playerLevel.get(second.getName()) + ")");
-				col.sendColouredMessage(second, "&red[Warzone] &green" + type + " match found with &9" + first.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(first.getName())) + " (" +
+				col.sendColouredMessage(second, "&red[Warzone] &green" + type + " " + Warzone.li.getObj("match found with") + " &9" + first.getName() + " - " + Statistics.levelTitles.get(Statistics.playerLevel.get(first.getName())) + " (" +
 						Statistics.playerLevel.get(first.getName()) + ")");
-				col.sendColouredMessage(first, "&red[Warzone] &aSelecting random map...");
-				col.sendColouredMessage(second, "&red[Warzone] &aSelecting random map...");
+				col.sendColouredMessage(first, "&red[Warzone] &a" + Warzone.li.getObj("Selecting random map..."));
+				col.sendColouredMessage(second, "&red[Warzone] &a" + Warzone.li.getObj("Selecting random map..."));
 		
 				if(Warzone.mapList.get(Warzone.MapName.ASCENSION).isOccupied() && Warzone.mapList.get(Warzone.MapName.CASTLE).isOccupied() && Warzone.mapList.get(Warzone.MapName.DUNGEON).isOccupied() &&
 						Warzone.mapList.get(Warzone.MapName.OVERFLOW).isOccupied() && Warzone.mapList.get(Warzone.MapName.PLAINES).isOccupied() && Warzone.mapList.get(Warzone.MapName.TOMB).isOccupied()
@@ -237,8 +241,8 @@ public class Pool {
 						 && Warzone.mapList.get(Warzone.MapName.HOMETREE).isOccupied() && Warzone.mapList.get(Warzone.MapName.AURORA).isOccupied() && Warzone.mapList.get(Warzone.MapName.ABYSS).isOccupied()
 						 && Warzone.mapList.get(Warzone.MapName.BURROW).isOccupied() && Warzone.mapList.get(Warzone.MapName.LAPUTA).isOccupied() && Warzone.mapList.get(Warzone.MapName.DOME).isOccupied()
 						 && Warzone.mapList.get(Warzone.MapName.NUKETOWN).isOccupied()){
-					col.sendColouredMessage(first, "&red[Warzone] All maps are occupied! Please wait.");
-					col.sendColouredMessage(second, "&red[Warzone] All maps are occupied! Please wait.");
+					col.sendColouredMessage(first, "&red[Warzone] " + Warzone.li.getObj("All maps are occupied! Please wait."));
+					col.sendColouredMessage(second, "&red[Warzone] " + Warzone.li.getObj("All maps are occupied! Please wait."));
 					searchers.remove(first);
 					searchers.remove(second);
 					return;
@@ -266,6 +270,7 @@ public class Pool {
 							case 17: map = Warzone.mapList.get(MapName.LAPUTA); break;
 							case 18: map = Warzone.mapList.get(MapName.DOME); break;
 							case 19: map = Warzone.mapList.get(MapName.NUKETOWN); break;
+							default: map = Warzone.mapList.get(MapName.ASCENSION); break;
 						}
 						if(!map.isOccupied()){
 							validmap = true;
@@ -273,8 +278,8 @@ public class Pool {
 					}
 					
 					map.setOccupiedState(true);
-					col.sendColouredMessage(first, "&red[Warzone] &aMap Chosen : &9" + map.getName() + ".&a Loading map...");
-					col.sendColouredMessage(second, "&red[Warzone] &aMap Chosen : &9" + map.getName() + ".&a Loading map...");
+					col.sendColouredMessage(first, "&red[Warzone] &a" + Warzone.li.getObj("Map Chosen") + " : &9" + map.getName() + ".&a " + Warzone.li.getObj("Loading map..."));
+					col.sendColouredMessage(second, "&red[Warzone] &a" + Warzone.li.getObj("Map Chosen") + " : &9" + map.getName() + ".&a " + Warzone.li.getObj("Loading map..."));
 					searchers.remove(first);
 					searchers.remove(second);
 					
@@ -332,24 +337,41 @@ public class Pool {
 						second.teleport(map.getSpawnPoints().get(1));
 					}
 					
+					if(!Maps.Warzone_World.getPVP()){
+						Maps.Warzone_World.setPVP(true);
+					}
+					
 					first.teleport(map.getSpawnPoints().get(0));
 					second.teleport(map.getSpawnPoints().get(1));
 					
-					col.sendColouredMessage(first, "&red[Warzone] &aMap Loaded!&4 Let battle commence!");
-					col.sendColouredMessage(second, "&red[Warzone] &aMap Loaded!&4 Let battle commence!");
+					for(Entity e : Maps.Warzone_World.getChunkAt(first.getLocation()).getEntities()){
+						if(e instanceof Arrow || e instanceof CraftArrow){
+							e.remove();
+						}
+					}
+					
+					for(Entity e : Maps.Warzone_World.getChunkAt(second.getLocation()).getEntities()){
+						if(e instanceof Arrow || e instanceof CraftArrow){
+							e.remove();
+						}
+					}
+					
+					col.sendColouredMessage(first, "&red[Warzone] &a" + Warzone.li.getObj("Map Loaded") + "!&4 " + Warzone.li.getObj("Let battle commence!"));
+					col.sendColouredMessage(second, "&red[Warzone] &a" + Warzone.li.getObj("Map Loaded") + "!&4 " + Warzone.li.getObj("Let battle commence!"));
 					
 					inventoryManage.wipeInventory(first);
 					inventoryManage.wipeInventory(second);
 					
 					first.getInventory().addItem(new ItemStack(261, 1));
 					inventmanage.addToInventory(first, 262, 64);
-					inventmanage.addToInventory(first, 263, 5);
+					inventmanage.addToInventory(first, 263, CoreConfiguration.coalAMT);
 					
 					second.getInventory().addItem(new ItemStack(261, 1));
 					inventmanage.addToInventory(second, 262, 64);
-					inventmanage.addToInventory(second, 263, 5);
+					inventmanage.addToInventory(second, 263, CoreConfiguration.coalAMT);
 					
 					gd.initiateScheduler();	
+					gd.respawn();
 					
 					/*switch(Preferences.armourType.get(first.getName())){
 					case NONE: break;

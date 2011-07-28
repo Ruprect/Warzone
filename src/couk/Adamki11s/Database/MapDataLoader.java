@@ -2,25 +2,25 @@ package couk.Adamki11s.Database;
 
 import java.io.File;
 
-import couk.Adamki11s.Games.ABYSS_GD;
-import couk.Adamki11s.Games.AFTERMATH_GD;
-import couk.Adamki11s.Games.ASCENSION_GD;
-import couk.Adamki11s.Games.AURORA_GD;
-import couk.Adamki11s.Games.BLIND_GD;
-import couk.Adamki11s.Games.BLIZZARD_GD;
-import couk.Adamki11s.Games.BURROW_GD;
-import couk.Adamki11s.Games.CASTLE_GD;
-import couk.Adamki11s.Games.CONTAINMENT_GD;
-import couk.Adamki11s.Games.CRYPT_GD;
-import couk.Adamki11s.Games.DOME_GD;
-import couk.Adamki11s.Games.DUNGEON_GD;
-import couk.Adamki11s.Games.HOMETREE_GD;
-import couk.Adamki11s.Games.JUNGLE_GD;
-import couk.Adamki11s.Games.LAPUTA_GD;
-import couk.Adamki11s.Games.NUKETOWN_GD;
-import couk.Adamki11s.Games.OVERFLOW_GD;
-import couk.Adamki11s.Games.PLAINES_GD;
-import couk.Adamki11s.Games.TOMB_GD;
+import couk.Adamki11s.Games.Solo.ABYSS_GD;
+import couk.Adamki11s.Games.Solo.AFTERMATH_GD;
+import couk.Adamki11s.Games.Solo.ASCENSION_GD;
+import couk.Adamki11s.Games.Solo.AURORA_GD;
+import couk.Adamki11s.Games.Solo.BLIND_GD;
+import couk.Adamki11s.Games.Solo.BLIZZARD_GD;
+import couk.Adamki11s.Games.Solo.BURROW_GD;
+import couk.Adamki11s.Games.Solo.CASTLE_GD;
+import couk.Adamki11s.Games.Solo.CONTAINMENT_GD;
+import couk.Adamki11s.Games.Solo.CRYPT_GD;
+import couk.Adamki11s.Games.Solo.DOME_GD;
+import couk.Adamki11s.Games.Solo.DUNGEON_GD;
+import couk.Adamki11s.Games.Solo.HOMETREE_GD;
+import couk.Adamki11s.Games.Solo.JUNGLE_GD;
+import couk.Adamki11s.Games.Solo.LAPUTA_GD;
+import couk.Adamki11s.Games.Solo.NUKETOWN_GD;
+import couk.Adamki11s.Games.Solo.OVERFLOW_GD;
+import couk.Adamki11s.Games.Solo.PLAINES_GD;
+import couk.Adamki11s.Games.Solo.TOMB_GD;
 
 public class MapDataLoader {
 	

@@ -11,11 +11,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.config.Configuration;
 
 import couk.Adamki11s.Extras.Player.ExtrasPlayer;
+import couk.Adamki11s.Warzone.Warzone;
 
 public class Preferences {
 	
 	public static HashMap<String, Armour> armourType = new HashMap<String, Armour>();
 	public static HashMap<String, ItemStack> blockHead = new HashMap<String, ItemStack>();
+	public static HashMap<String, Material> swordType = new HashMap<String, Material>();
 	
 	File root = new File("plugins/Warzone/Preferences");
 	
@@ -39,6 +41,7 @@ public class Preferences {
 			}
 			c.setProperty("Preferences.ArmourType", "NONE");
 			c.setProperty("Preferences.BlockOnHead", "AIR");
+			c.setProperty("Preferences.Sword", Material.WOOD_SWORD.toString());
 			c.save();
 		}
 	}
@@ -49,9 +52,54 @@ public class Preferences {
 		c.load();
 		armourType.put(name.toString(), getArmour(c.getString("Preferences.ArmourType", "NONE")));
 		blockHead.put(name.toString(), new ItemStack((Material.getMaterial(c.getString("Preferences.BlockOnHead", "AIR"))), 1));
+		swordType.put(name.toString(), Material.getMaterial(c.getString("Preferences.Sword", Material.WOOD_SWORD.toString())));
 	}
 	
 	ExtrasPlayer ep = new ExtrasPlayer();
+	
+	public void modifySwordType(Player p, String sword){
+		int level = Statistics.playerLevel.get(p.getName());
+		File pref = new File(root + File.separator + p.getName() + ".pref");
+		Configuration c = new Configuration(pref);
+		Material m = Material.getMaterial(sword);
+		if(sword.equalsIgnoreCase("wood") || sword.equalsIgnoreCase("wooden")){
+			m = Material.WOOD_SWORD;
+		} else if(sword.equalsIgnoreCase("iron")){
+			m = Material.IRON_SWORD;
+		} else if(sword.equalsIgnoreCase("gold") || sword.equalsIgnoreCase("golden")){
+			m = Material.GOLD_SWORD;
+		} else if(sword.equalsIgnoreCase("diamond")){
+			m = Material.DIAMOND_SWORD;
+		}
+		if(m != Material.WOOD_SWORD && m != Material.IRON_SWORD && m != Material.GOLD_SWORD && m!= Material.DIAMOND_SWORD){
+			p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("Invalid Sword Type") + "! WOOD, IRON, GOLD, DIAMOND only!");
+			return;
+		} else {			
+			if(m == Material.WOOD_SWORD && level < 10){
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + "10" + Warzone.li.getObj("or above to do this") + "!");
+				return;
+			} else if(m == Material.IRON_SWORD && level < 20){
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + "20" + Warzone.li.getObj("or above to do this") + "!");
+				return;
+			} else if(m == Material.GOLD_SWORD && level < 30){
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + "30" + Warzone.li.getObj("or above to do this") + "!");
+				return;
+			} else if(m == Material.DIAMOND_SWORD && level < 40){
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + "40" + Warzone.li.getObj("or above to do this") + "!");
+				return;
+			} 
+			
+			c.load();
+			c.setProperty("Preferences.BlockOnHead", c.getString("Preferences.BlockOnHead", "AIR"));
+			c.setProperty("Preferences.ArmourType", c.getString("Preferences.ArmourType", "NONE"));
+			c.setProperty("Preferences.Sword", m.toString());
+			c.save();
+			
+			swordType.put(p.getName().toString(), m);
+			
+			p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + Warzone.li.getObj("Sword preference changed to") + " " + ChatColor.BLUE + m.toString());
+		}
+	}
 	
 	public void modifyBlockOnHead(Player p, int material){
 		int level = Statistics.playerLevel.get(p.getName());
@@ -61,16 +109,17 @@ public class Preferences {
 		Material m = Material.getMaterial(material);
 		if(level >= 40){
 			if(m == null || m == Material.AIR){			
-				p.sendMessage(ChatColor.RED + "[Warzone] Inavlid Material Type!");
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("Invalid Material Type!"));
 				return;
 			}
 			c.setProperty("Preferences.ArmourType", c.getString("Preferences.ArmourType", "NONE"));
 			c.setProperty("Preferences.BlockOnHead", c.getString("Preferences.BlockOnHead", m.toString().toUpperCase()));
+			c.setProperty("Preferences.Sword", c.getString("Preferences.Sword", Material.WOOD_SWORD.toString()));
 			blockHead.put(p.getName(), new ItemStack(m, 1));
 			p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + "Block preference changed to " + ChatColor.DARK_AQUA + m.toString().toUpperCase() + ChatColor.GREEN + " successfully!");
 			c.save();
 		} else {
-			p.sendMessage(ChatColor.RED + "[Warzone] You must be level 40 or above to do this!");
+			p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + "40" + Warzone.li.getObj("or above to do this") + "!");
 			return;
 		}
 	}
@@ -117,14 +166,15 @@ public class Preferences {
 			if(canusearmour){
 				c.setProperty("Preferences.ArmourType", a.toString());
 				c.setProperty("Preferences.BlockOnHead", c.getString("Preferences.BlockOnHead", "AIR"));
+				c.setProperty("Preferences.Sword", c.getString("Preferences.Sword", Material.WOOD_SWORD.toString()));
 				c.save();
-				p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.GREEN + " Armour type changed to " + ChatColor.DARK_AQUA + a.toString() + ChatColor.GREEN + " sucessfully!");
+				p.sendMessage(ChatColor.RED + "[Warzone]" + ChatColor.GREEN + " " + Warzone.li.getObj("Armour type changed to") + " " + ChatColor.DARK_AQUA + a.toString() + ChatColor.GREEN + " " + Warzone.li.getObj("sucessfully!"));
 				armourType.put(p.getName(), a);
 			} else {
-				p.sendMessage(ChatColor.RED + "[Warzone] You must be level " + ChatColor.DARK_AQUA + l + ChatColor.RED + " to wield this armour!");
+				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("You must be level") + " " + ChatColor.DARK_AQUA + l + ChatColor.RED + " " + Warzone.li.getObj("to wield this armour!"));
 			}
 		} else {
-			p.sendMessage(ChatColor.RED + "[Warzone] Error : Armour type can only be NONE, LEATHER,    IRON, GOLD or DIAMOND.");
+			p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("Error : Armour type can only be") + " NONE, LEATHER,    IRON, GOLD or DIAMOND.");
 			return;
 		}
 	}

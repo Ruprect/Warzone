@@ -25,7 +25,8 @@ public class Initialise {
 	inventoryRoot = new File(mainDir + File.separator + "Inventory"),
 	preferencesRoot = new File(mainDir + File.separator + "Preferences"),
 	lobbyRoot = new File(mainDir + File.separator + "Lobby"),
-	playerRetRoot = new File(mainDir + File.separator + "Return");
+	playerRetRoot = new File(mainDir + File.separator + "Return"),
+	langRoot = new File(mainDir + File.separator + "Language");
 
 	public void init(){
 		directoryCheck();
@@ -64,6 +65,10 @@ public class Initialise {
 		if(!playerRetRoot.exists()){
 			System.out.println(Warzone.prefix + " Creating Return Directory...");
 			playerRetRoot.mkdir();
+		}
+		if(!langRoot.exists()){
+			System.out.println(Warzone.prefix + " Creating Languages Directory...");
+			langRoot.mkdir();
 		}
 	}
 	
