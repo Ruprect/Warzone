@@ -127,9 +127,6 @@ public class LangInterface_EN {
 		if(s.equalsIgnoreCase("You quit unexpectedly!")){
 			return "You quit unexpectedly!";
 		}
-		if(s.equalsIgnoreCase("Returned to previous location.")){
-			return "Returned to previous location.";
-		}
 		if(s.equalsIgnoreCase("Inventory was restored successfully.")){
 			return "Inventory was restored successfully.";
 		}

@@ -1,6 +1,7 @@
 name: Warzone
 main: couk.Adamki11s.Warzone.Warzone
-version: 1.0
+version: 1.03
+authors: [Adamki11s, MineDev]
 commands:
   warzone:
     aliases: wz

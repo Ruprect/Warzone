@@ -33,11 +33,15 @@ public class LanguageConfiguration {
 		try {
 			fstream = new FileWriter(lang, true);
 			BufferedWriter fbw = new BufferedWriter(fstream);
-			fbw.write("#Supported languages: English, French.");
+			fbw.write("#Supported languages: English, French, German.");
 	        fbw.newLine();
 	        fbw.write("#For English : EN");
 	        fbw.newLine();
 	        fbw.write("#For French : FR");
+	        fbw.newLine();
+	        fbw.write("#For German : DE");
+	        fbw.newLine();
+	        fbw.write("#Credits go to : @Zeerix for the German translation and @Ethneldryt for the French translation.");
 	        fbw.close();
         } catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -60,6 +64,10 @@ public class LanguageConfiguration {
 			System.out.println("[Warzone] Language setting : FRENCH");
 			writeNotes();
 			return Langs.FRENCH;
+		} else if(langRes.equalsIgnoreCase("DE")){
+			System.out.println("[Warzone] Language setting : GERMAN");
+			writeNotes();
+			return Langs.GERMAN;
 		} else {
 			System.out.println("[Warzone][ERROR] Language set to ENGLISH by Default.");
 			System.out.println("[Warzone][ERROR] Invalid property in configuration file!");

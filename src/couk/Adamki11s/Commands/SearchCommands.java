@@ -61,18 +61,6 @@ public class SearchCommands {
 			}
 		}
 		
-		if(args.length == 1 && args[0].equalsIgnoreCase("return")){
-			if(prh.doesExist(p)){
-				p.teleport(prh.getReturnLocation(p));
-				prh.removeReturn(p);
-				p.sendMessage(ChatColor.RED + "[Warzone] " + ChatColor.GREEN + Warzone.li.getObj("Returned to previous location."));
-				return;
-			} else {
-				p.sendMessage(ChatColor.RED + "[Warzone] " + Warzone.li.getObj("No return location exists!"));
-				return;
-			}
-		}	
-		
 	}
 
 }
